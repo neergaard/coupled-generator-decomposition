@@ -13,27 +13,27 @@ for m in range(3):
     norm1 = np.random.multivariate_normal([5, 0], [[1, 1], [1, 2]], size = (int(P/3),B,L))
     norm2 = np.random.multivariate_normal([17, 0], [[3, -1], [-1, 7]], size = (int(P/3),B,L))
     norm3 = np.random.multivariate_normal([15, 10], [[10, 0.2], [0.2, 5]], size = (int(P/3),B,L))
-    X[modalitynames[m]] = torch.tensor(np.transpose(np.concatenate((norm1,norm2,norm3),axis=0),(3,0,1,2)))
+    X[modalitynames[m]] = torch.tensor(np.transpose(np.concatenate((norm1,norm2,norm3),axis=0),(1,2,3,0)))
 
 
 M = len(X)
 K = 3
 
-model = TMMSAA.TMMSAA(num_dimensions=P, num_comp=K,num_subjects=B,num_conditions=L,num_modalities=M)
+model = TMMSAA.TMMSAA(dimensions=X['EEG'].shape, num_modalities=M,num_comp=K)
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.1)
 loss = TMMSAA_trainer.Optimizationloop(model=model,X=X,Optimizer=optimizer,max_iter=5000,tol=1e-10)
 
 # plots for one subject
 C = torch.nn.functional.softmax(model.state_dict()['C'],dim=0)
-S = torch.nn.functional.softmax(model.state_dict()['S'],dim=0)
+S = torch.nn.functional.softmax(model.state_dict()['S'],dim=-1)
 
 sub = 0
 cond = 0
 mod = 'EEG'
 mod2 = 0
-XC = (X[mod][:,:,sub,cond]@C).T.detach()
+XC = (X[mod][sub,cond]@C).T.detach()
 plt.figure()
-plt.plot(X[mod][0,:,sub,cond].detach(),X[mod][1,:,sub,cond].detach(),'.')
+plt.plot(X[mod][sub,cond,0].detach(),X[mod][sub,cond,1].detach(),'.')
 plt.plot(XC[:,0], XC[:,1],'X',alpha=1)
 plt.fill(XC[:,0], XC[:,1], facecolor='none', edgecolor='purple', linewidth=1)
 
