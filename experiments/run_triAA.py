@@ -4,8 +4,8 @@ import numpy as np
 from TMMSAA import TMMSAA,TMMSAA_trainer
 
 P = 300
-B = 1
-L = 1
+B = 10
+L = 3
 N = 2
 modalitynames = ['EEG','MEG','fMRI']
 X = {}

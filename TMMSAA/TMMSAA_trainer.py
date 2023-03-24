@@ -15,7 +15,7 @@ def Optimizationloop(model,X,Optimizer,max_iter=100,tol=1e-10):
         #loss = model(X)
 
         loss = 0
-        for m,key in enumerate(X):
+        for key in X:
             loss += lossCriterion(Xrecon[key],X[key])
         
         all_loss.append(loss.detach())
