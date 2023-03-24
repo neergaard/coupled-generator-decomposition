@@ -1,2 +1,4 @@
 data/
+freesurfer/
+slurm/
 *.egginfo

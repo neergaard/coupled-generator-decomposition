@@ -1,0 +1,67 @@
+/mrhome/jesperdn/miniconda3/envs/simnibs/lib/python3.9/site-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.16.5 and <1.23.0 is required for this version of SciPy (detected version 1.23.5
+  warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+PREPROCESSING
+mri_convert /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-03/mri/orig.mgz /mrhome/jesperdn/INN_JESPER/projects/facerecognition_dtu/data/sub-03/ses-mri/anat/T1_freesurfer_space.nii 
+reading from /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-03/mri/orig.mgz...
+TR=0.00, TE=0.00, TI=0.00, flip angle=0.00
+i_ras = (-1, 0, 3.72529e-09)
+j_ras = (-3.72529e-09, -7.27596e-10, -1)
+k_ras = (-4.65661e-10, 1, 1.65892e-09)
+writing to /mrhome/jesperdn/INN_JESPER/projects/facerecognition_dtu/data/sub-03/ses-mri/anat/T1_freesurfer_space.nii...
+
+
+------------------------------------------------------------------------
+28-Feb-2023 09:23:15 - Running job #1
+------------------------------------------------------------------------
+28-Feb-2023 09:23:15 - Running 'Slice Timing'
+
+SPM12: spm_slice_timing (v6130)                    09:23:15 - 28/02/2023
+========================================================================
+Number of slices is...                  :                             33
+Time to Repeat (TR) is...               :                              2
+Parameters are specified as...          :               slice times (ms)
+Completed                               :          09:25:12 - 28/02/2023
+28-Feb-2023 09:25:12 - Done    'Slice Timing'
+28-Feb-2023 09:25:12 - Done
+
+
+
+------------------------------------------------------------------------
+28-Feb-2023 09:25:13 - Running job #1
+------------------------------------------------------------------------
+28-Feb-2023 09:25:13 - Running 'Realign: Estimate & Reslice'
+
+SPM12: spm_realign (v7141)                         09:25:13 - 28/02/2023
+========================================================================
+Completed                               :          09:29:34 - 28/02/2023
+
+SPM12: spm_reslice (v7141)                         09:29:34 - 28/02/2023
+========================================================================
+Completed                               :          09:31:00 - 28/02/2023
+28-Feb-2023 09:31:00 - Done    'Realign: Estimate & Reslice'
+28-Feb-2023 09:31:00 - Done
+
+
+
+------------------------------------------------------------------------
+28-Feb-2023 09:31:01 - Running job #1
+------------------------------------------------------------------------
+28-Feb-2023 09:31:01 - Running 'Coregister: Estimate'
+
+SPM12: spm_coreg (v7320)                           09:31:01 - 28/02/2023
+========================================================================
+Completed                               :          09:31:08 - 28/02/2023
+28-Feb-2023 09:32:21 - Done    'Coregister: Estimate'
+28-Feb-2023 09:32:21 - Done
+
+
+
+------------------------------------------------------------------------
+28-Feb-2023 09:32:22 - Running job #1
+------------------------------------------------------------------------
+28-Feb-2023 09:32:22 - Running 'Smooth'
+28-Feb-2023 09:34:19 - Done    'Smooth'
+28-Feb-2023 09:34:19 - Done
+
+module load spm && module load matlab && module load freesurfer && matlab -batch "addpath('/home/jesperdn/project_tools/matlab/projects/facerecognition_dtu'); fmri_preprocess('3', '/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117', '/mrhome/jesperdn/INN_JESPER/projects/facerecognition_dtu/data', '/mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer')"
+Done

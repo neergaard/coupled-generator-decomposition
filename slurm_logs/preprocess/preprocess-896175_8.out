@@ -1,0 +1,477 @@
+/mrhome/jesperdn/miniconda3/envs/simnibs/lib/python3.9/site-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.16.5 and <1.23.0 is required for this version of SciPy (detected version 1.23.5
+  warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+Processing
+Run : 01
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-01_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/78/1Z/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/78/1Z/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/78/1Z/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 258500 ... 808499 =    235.000 ...   734.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-01_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-01_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-01_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/78/1Z/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif/MD5E-s895790527--efa5556df8c4d3f2459504e717e1d884.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 549999  =      0.000 ...   499.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    5.5s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+148 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 148 events and 991 original time points ...
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+18 bad epochs dropped
+Run : 02
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-02_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/jw/xx/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/jw/xx/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/jw/xx/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 102300 ... 644599 =     93.000 ...   585.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-02_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-02_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-02_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/jw/xx/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif/MD5E-s883346012--10b896c74d705421344ec3dcb0486c6a.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 542299  =      0.000 ...   492.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    4.9s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+148 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 148 events and 991 original time points ...
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+3 bad epochs dropped
+Run : 03
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-03_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/m7/2F/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/m7/2F/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/m7/2F/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 30800 ... 577499 =     28.000 ...   524.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-03_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-03_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-03_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/m7/2F/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif/MD5E-s890456579--89ac8e4f42def0d2e03e7ce3ed0e9bf0.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 546699  =      0.000 ...   496.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    5.5s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+149 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 149 events and 991 original time points ...
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['HEOG', 'VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['HEOG', 'VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['HEOG', 'VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+12 bad epochs dropped
+Run : 04
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-04_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/33/2G/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/33/2G/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/33/2G/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 173800 ... 716099 =    158.000 ...   650.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-04_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-04_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-04_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/33/2G/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif/MD5E-s883346003--73ff6b1d502910332bafe958082ab798.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 542299  =      0.000 ...   492.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    5.0s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+148 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 148 events and 991 original time points ...
+0 bad epochs dropped
+Run : 05
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-05_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/QM/pj/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/QM/pj/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/QM/pj/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 88000 ... 633599 =     80.000 ...   575.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-05_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-05_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-05_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/QM/pj/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif/MD5E-s888678947--9f5f3b7401633936b11eedb25046b9e6.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 545599  =      0.000 ...   495.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    5.1s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+149 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 149 events and 991 original time points ...
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+2 bad epochs dropped
+Run : 06
+Resolving symbolic link: /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-06_proc-sss_meg.fif -> /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/10/z3/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif
+Opening raw data file /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/10/z3/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif...
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: This filename (/mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/10/z3/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif) does not conform to MNE naming conventions. All raw files should end with raw.fif, raw_sss.fif, raw_tsss.fif, _meg.fif, _eeg.fif, _ieeg.fif, raw.fif.gz, raw_sss.fif.gz, raw_tsss.fif.gz, _meg.fif.gz, _eeg.fif.gz or _ieeg.fif.gz
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+    Range : 126500 ... 666599 =    115.000 ...   605.999 secs
+Ready.
+Reading events from /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-06_proc-sss_events.tsv.
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: The events file, /mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/ses-meg/meg/sub-08_ses-meg_task-facerecognition_run-06_proc-sss_events.tsv, contains a "stim_type" column. This column should be renamed to "trial_type" for BIDS compatibility.
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: Did not find any channels.tsv associated with sub-08_ses-meg_task-facerecognition_run-06_proc-sss.
+
+The search_str was "/mrhome/jesperdn/INN_JESPER/DATASETS/nobackup/openneuro/ds000117/derivatives/meg_derivatives/sub-08/**/meg/sub-08_ses-meg*channels.tsv"
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:138: RuntimeWarning: participants.tsv file not found for /mnt/newprojects/INN/jesper/DATASETS/nobackup/openneuro/ds000117/.git/annex/objects/10/z3/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif/MD5E-s879790731--e90492c7a53d47bc0d720851f58ba7ac.fif
+  raw = mne_bids.read_raw_bids(bids_path=io.bids["meg"])
+Reading 0 ... 540099  =      0.000 ...   490.999 secs...
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   4 out of   4 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done 376 out of 376 | elapsed:    5.2s finished
+Filtering a subset of channels. The highpass and lowpass values in the measurement info will not be updated.
+Filtering raw data in 1 contiguous segment
+Setting up band-pass filter from 1 - 40 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 1.00
+- Lower transition bandwidth: 1.00 Hz (-6 dB cutoff frequency: 0.50 Hz)
+- Upper passband edge: 40.00 Hz
+- Upper transition bandwidth: 10.00 Hz (-6 dB cutoff frequency: 45.00 Hz)
+- Filter length: 3631 samples (3.301 sec)
+
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   2 out of   2 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   3 out of   3 | elapsed:    0.0s finished
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:53: RuntimeWarning: No bad channels to interpolate. Doing nothing...
+  raw = raw.interpolate_bads()
+EEG channel type selected for re-referencing
+Adding average EEG reference projection.
+1 projection items deactivated
+Average reference projection was added, but has not been applied yet. Use the apply_proj method to apply it.
+Epoching...
+Not setting metadata
+147 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+1 projection items activated
+Using data from preloaded Raw for 147 events and 991 original time points ...
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+    Rejecting  epoch based on EOG : ['VEOG']
+6 bad epochs dropped
+/mrhome/jesperdn/project_tools/python/projects/facerecognition_dtu/preprocess.py:118: RuntimeWarning: Concatenation of Annotations within Epochs is not supported yet. All annotations will be dropped.
+  epochs = mne.concatenate_epochs(epochs)
+Not setting metadata
+848 matching events found
+No baseline correction applied
+Created an SSP operator (subspace dimension = 1)
+slurmstepd: error: *** JOB 896183 ON gojira CANCELLED AT 2023-02-28T08:59:02 ***

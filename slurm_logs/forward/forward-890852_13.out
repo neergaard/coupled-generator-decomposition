@@ -1,0 +1,214 @@
+/mrhome/jesperdn/miniconda3/envs/simnibs/lib/python3.9/site-packages/scipy/__init__.py:146: UserWarning: A NumPy version >=1.16.5 and <1.23.0 is required for this version of SciPy (detected version 1.23.5
+  warnings.warn(f"A NumPy version >={np_minversion} and <{np_maxversion}"
+    Read a total of 1 projection items:
+        Average EEG reference (1 x 70) active
+/home/jesperdn/project_tools/python/projects/facerecognition/utils.py:70: FutureWarning: extension should start with a period ".", but got: "fif". Prepending "." to form: ".fif". This will raise an exception starting with MNE-BIDS 0.12.
+  meg=mne_bids.BIDSPath(
+Setting up the source space with the following parameters:
+
+SUBJECTS_DIR = /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer
+Subject      = sub-13
+Surface      = white
+Icosahedron subdivision grade 5
+
+>>> 1. Creating the source space...
+
+Doing the icosahedral vertex picking...
+Loading /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-13/surf/lh.white...
+Mapping lh sub-13 -> ico (5) ...
+    Triangle neighbors and vertex normals...
+Loading geometry from /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-13/surf/lh.sphere...
+Setting up the triangulation for the decimated surface...
+loaded lh.white 10242/139049 selected to source space (ico = 5)
+
+Loading /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-13/surf/rh.white...
+Mapping rh sub-13 -> ico (5) ...
+    Triangle neighbors and vertex normals...
+Loading geometry from /mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/sub-13/surf/rh.sphere...
+Setting up the triangulation for the decimated surface...
+loaded rh.white 10242/138057 selected to source space (ico = 5)
+
+Calculating patch information (limit=0.0 mm)...
+    Computing patch statistics...
+    Patch information added...
+    Computing patch statistics...
+    Patch information added...
+You are now one step closer to computing the gain matrix
+Overwriting existing file.
+    Write a source space...
+    [done]
+    Write a source space...
+    [done]
+    2 source spaces written
+Creating the BEM geometry...
+Going from 4th to 4th subdivision of an icosahedron (n_tri: 5120 -> 5120)
+Going from 4th to 4th subdivision of an icosahedron (n_tri: 5120 -> 5120)
+Going from 4th to 4th subdivision of an icosahedron (n_tri: 5120 -> 5120)
+outer skin  CM is  -4.10 -15.05  20.28 mm
+outer skull CM is  -1.33 -18.92  25.55 mm
+inner skull CM is  -1.25 -19.34  24.98 mm
+Checking that surface outer skull is inside surface outer skin  ...
+Checking that surface inner skull is inside surface outer skull ...
+Checking distance between outer skin  and outer skull surfaces...
+Minimum distance between the outer skin  and outer skull surfaces is approximately    2.8 mm
+Checking distance between outer skull and inner skull surfaces...
+Minimum distance between the outer skull and inner skull surfaces is approximately    4.1 mm
+Surfaces passed the basic topology checks.
+Complete.
+
+Three-layer model surfaces loaded.
+Computing the linear collocation solution...
+    Matrix coefficients...
+        outer skin  (2562) -> outer skin  (2562) ...
+        outer skin  (2562) -> outer skull (2562) ...
+        outer skin  (2562) -> inner skull (2562) ...
+        outer skull (2562) -> outer skin  (2562) ...
+        outer skull (2562) -> outer skull (2562) ...
+        outer skull (2562) -> inner skull (2562) ...
+        inner skull (2562) -> outer skin  (2562) ...
+        inner skull (2562) -> outer skull (2562) ...
+        inner skull (2562) -> inner skull (2562) ...
+    Inverting the coefficient matrix...
+IP approach required...
+    Matrix coefficients (homog)...
+        inner skull (2562) -> inner skull (2562) ...
+    Inverting the coefficient matrix (homog)...
+    Modify the original solution to incorporate IP approach...
+        Combining...
+        Scaling...
+Solution ready.
+BEM geometry computations complete.
+Source space          : <SourceSpaces: [<surface (lh), n_vertices=139049, n_used=10242>, <surface (rh), n_vertices=138057, n_used=10242>] MRI (surface RAS) coords, subject 'sub-13', ~28.5 MB>
+MRI -> head transform : instance of Transform
+Measurement data      : instance of Info
+Conductor model   : instance of ConductorModel
+Accurate field computations
+Do computations in head coordinates
+Free source orientations
+
+Read 2 source spaces a total of 20484 active source locations
+
+Coordinate transformation: MRI (surface RAS) -> head
+     0.997861  0.050090 -0.042000       3.07 mm
+    -0.042737  0.986087  0.160644      19.00 mm
+     0.049463 -0.158505  0.986118      37.66 mm
+     0.000000  0.000000  0.000000       1.00
+
+Read 306 MEG channels from info
+105 coil definitions read
+Coordinate transformation: MEG device -> head
+     0.999454  0.025529 -0.020978      -1.89 mm
+    -0.026850  0.997502 -0.065330     -17.91 mm
+     0.019258  0.065858  0.997643      45.46 mm
+     0.000000  0.000000  0.000000       1.00
+MEG coil definitions created in head coordinates.
+Read  70 EEG channels from info
+Head coordinate coil definitions created.
+Source spaces are now in head coordinates.
+
+Employing the head->MRI coordinate transform with the BEM model.
+BEM model instance of ConductorModel is now set up
+
+Source spaces are in head coordinates.
+Checking that the sources are inside the surface (will take a few...)
+Checking surface interior status for 10242 points...
+    Found  4136/10242 points inside  an interior sphere of radius   50.5 mm
+    Found     2/10242 points outside an exterior sphere of radius   95.1 mm
+    Found     9/ 6104 points outside using surface Qhull
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    2.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    2.8s finished
+    Found     2/ 6095 points outside using solid angles
+    Total 10229/10242 points inside the surface
+Interior check completed in 2799.4 ms
+    13 source space points omitted because they are outside the inner skull surface.
+    Computing patch statistics...
+    Patch information added...
+Checking surface interior status for 10242 points...
+    Found  4444/10242 points inside  an interior sphere of radius   50.5 mm
+    Found     0/10242 points outside an exterior sphere of radius   95.1 mm
+    Found     3/ 5798 points outside using surface Qhull
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    2.6s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    2.6s finished
+    Found     4/ 5795 points outside using solid angles
+    Total 10235/10242 points inside the surface
+Interior check completed in 2612.4 ms
+    7 source space points omitted because they are outside the inner skull surface.
+    Computing patch statistics...
+    Patch information added...
+
+Checking surface interior status for 306 points...
+    Found   0/306 points inside  an interior sphere of radius   65.8 mm
+    Found   9/306 points outside an exterior sphere of radius  154.2 mm
+    Found 297/297 points outside using surface Qhull
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.0s finished
+    Found   0/  0 points outside using solid angles
+    Total 0/306 points inside the surface
+Interior check completed in 18.1 ms
+
+Composing the field computation matrix...
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.7s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.7s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.8s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s finished
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    0.1s finished
+Setting up for EEG...
+Computing MEG at 20464 source locations (free orientations)...
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:   15.8s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:   15.8s finished
+Computing EEG at 20464 source locations (free orientations)...
+[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    9.3s remaining:    0.0s
+[Parallel(n_jobs=1)]: Done   1 out of   1 | elapsed:    9.3s finished
+
+Finished.
+surface source space present ...
+Computing morph matrix...
+Morph map "/mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer/morph-maps/fsaverage-sub-13-morph.fif" does not exist, creating it and saving it to disk
+Creating morph map sub-13 -> fsaverage
+Creating morph map fsaverage -> sub-13
+    7 smooth iterations done.
+    6 smooth iterations done.
+[done]
+[done]
+    Write a source space...
+    [done]
+    Write a source space...
+    [done]
+    2 source spaces written
+Done
