@@ -1,5 +1,7 @@
 README.md
 setup.py
+TMMSAA/TMMSAA.py
+TMMSAA/TMMSAA_trainer.py
 TMMSAA/__init__.py
 TMMSAA.egg-info/PKG-INFO
 TMMSAA.egg-info/SOURCES.txt
