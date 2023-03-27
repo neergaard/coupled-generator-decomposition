@@ -30,8 +30,8 @@ for split in range(2):
             evo.pick_types('mag')
             data = torch.tensor(evo.data)
             X_MEG[sub,cond_idx,:,:] = data/torch.norm(data,p='fro')
-    torch.save(X_EEG,'data/X_EEG_split'+str(split)+'.pt')
-    torch.save(X_MEG,'data/X_MEG_split'+str(split)+'.pt')
+    torch.save(X_EEG,'data/concatenatedData/X_EEG_split'+str(split)+'.pt')
+    torch.save(X_MEG,'data/concatenatedData/X_MEG_split'+str(split)+'.pt')
     torch.save(evo.times,'data/MEEGtimes.pt')
 
 # %% flipped EEG, l2 normalized
@@ -70,8 +70,8 @@ for sub in range(num_subjects):
         projections = torch.sum(X_EEG[sub,cond_idx]*score,dim=0)
         to_flip = 2*(projections < 0) -1
         Xf_EEG[sub,cond_idx] = X_EEG[sub,cond_idx]*to_flip
-torch.save(Xf_EEG[:,:,:,:180],'data/Xf_EEG_split'+str(0)+'.pt')
-torch.save(Xf_EEG[:,:,:,180:],'data/Xf_EEG_split'+str(1)+'.pt')
+torch.save(Xf_EEG[:,:,:,:180],'data/concatenatedData/Xf_EEG_split'+str(0)+'.pt')
+torch.save(Xf_EEG[:,:,:,180:],'data/concatenatedData/Xf_EEG_split'+str(1)+'.pt')
 
 # %% flipped MEG, l2 normalized
 X_MEG = torch.zeros(num_subjects,len(conditions),102,360,dtype=torch.double)
@@ -109,5 +109,5 @@ for sub in range(num_subjects):
         projections = torch.sum(X_MEG[sub,cond_idx]*score,dim=0)
         to_flip = 2*(projections < 0) -1
         Xf_MEG[sub,cond_idx] = X_MEG[sub,cond_idx]*to_flip
-torch.save(Xf_MEG[:,:,:,:180],'data/Xf_MEG_split'+str(0)+'.pt')
-torch.save(Xf_MEG[:,:,:,180:],'data/Xf_MEG_split'+str(1)+'.pt')
+torch.save(Xf_MEG[:,:,:,:180],'data/concatenatedData/Xf_MEG_split'+str(0)+'.pt')
+torch.save(Xf_MEG[:,:,:,180:],'data/concatenatedData/Xf_MEG_split'+str(1)+'.pt')
