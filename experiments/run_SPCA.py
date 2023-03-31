@@ -1,8 +1,7 @@
 import sys
-import matplotlib.pyplot as plt
 import torch
 import numpy as np
-from TMMSAA import TMMSAA, TMMSAA_trainer, visualize_AA_trajectory
+from TMMSAA import TMMSAA, TMMSAA_trainer
 torch.set_num_threads(8)
 
 def run_model(M,K):
