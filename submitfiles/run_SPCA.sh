@@ -1,6 +1,6 @@
 for M in 0 1 2
 do
-for K in 2 3 4 5 6 7 8 9 10
+for K in 2 3 4 5 6 7 8 9
 do
 
     sed -i '$ d' submit_SPCA.sh
