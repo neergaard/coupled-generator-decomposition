@@ -15,6 +15,5 @@ module load python3/3.10.7
 module load numpy/1.23.3-python-3.10.7-openblas-0.3.21
 python3 -m pip install --user tqdm torch
 cd ..
-
 pip install -e .
 python3 realdata_fit.py 0 4
