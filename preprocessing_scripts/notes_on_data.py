@@ -1,9 +1,8 @@
 from pathlib import Path
 import mne
-import matplotlib.pyplot as plt
 
-fs_dir = Path('freesurfer')
-data_dir = Path('data/JesperProcessed')
+fs_dir = Path("/mrhome/jesperdn/INN_JESPER/projects/facerecognition/freesurfer")
+data_dir = Path("/mrhome/jesperdn/INN_JESPER/projects/facerecognition_dtu/data")
 subject = "sub-01"
 
 subject_dir = data_dir / subject
@@ -32,11 +31,11 @@ evo = evo[0]
 
 # to get from subject space to fsaverage
 # without -[l/r]h.stc !
-stc = mne.read_source_estimate(inv_dir / "task-facerecognition_cond-famous_fwd-mne_ch-eeg_split-0_stc")
+stc = mne.read_source_estimate("task-facerecognition_cond-famous_fwd-mne_ch-eeg_split-0_stc")
 morph = mne.read_source_morph(fwd_dir / "task-facerecognition_fwd-mne_morph.h5")
 morph.apply(stc)
 # I already did this; should be equal to
-stc = mne.read_source_estimate(inv_dir / "task-facerecognition_space-fsaverage_cond-famous_fwd-mne_ch-meg_split-0_stc")
+stc = mne.read_source_estimate("task-facerecognition_space-fsaverage_cond-famous_fwd-mne_ch-eeg_split-0_stc")
 # get data: stc.data, stc.lh_data, stc.rh_data
 
 # fMRI is read in a similar manner!

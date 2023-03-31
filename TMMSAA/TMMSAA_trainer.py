@@ -1,5 +1,6 @@
 # optimization loop
 from tqdm import tqdm
+import torch
 
 
 def Optimizationloop(model, X, Optimizer, Xtilde=None, max_iter=100, tol=1e-10):
@@ -9,7 +10,7 @@ def Optimizationloop(model, X, Optimizer, Xtilde=None, max_iter=100, tol=1e-10):
     all_loss = []
 
     if Xtilde is None:
-        Xtilde = X.copy()
+        Xtilde = X.clone()
 
     # X = X.to(device)
     for epoch in tqdm(range(max_iter)):
