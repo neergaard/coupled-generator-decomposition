@@ -46,9 +46,9 @@ def run_model(M,K):
             for l2,lambda2 in enumerate(l2_vals):
                 for l1,lambda1 in enumerate(l1_vals):
                     if l1==0:
-                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities[m1],model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
+                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
                     else:
-                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities[m1],model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
+                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
                     optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
                     loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],Optimizer=optimizer,max_iter=10000,tol=1e-3)
                     C,S,Bp,Bn = model.get_model_params(X=X[modeltype])
