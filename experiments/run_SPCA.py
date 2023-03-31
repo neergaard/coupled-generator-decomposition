@@ -42,7 +42,7 @@ def run_model(M,K):
 
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
-            all_loss = np.zeros(len(l2_vals),len(l1_vals))
+            all_loss = np.zeros((len(l2_vals),len(l1_vals)))
             for l2,lambda2 in enumerate(l2_vals):
                 for l1,lambda1 in enumerate(l1_vals):
                     if l1==0:
