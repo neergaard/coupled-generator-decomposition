@@ -17,3 +17,4 @@ python3 -m pip install --user tqdm torch
 cd ..
 pip install -e .
 python3 realdata_fit.py 0 4
+
