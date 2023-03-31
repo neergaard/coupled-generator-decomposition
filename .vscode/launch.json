@@ -19,6 +19,14 @@
             "program": "experiments/run_triAA.py",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "Run SPCA",
+            "type": "python",
+            "request": "launch",
+            "program": "experiments/run_SPCA.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
         }
     ]
 }

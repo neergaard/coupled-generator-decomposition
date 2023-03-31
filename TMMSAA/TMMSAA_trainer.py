@@ -8,16 +8,18 @@ def Optimizationloop(model, X, Optimizer, Xtilde=None, max_iter=100, tol=1e-10):
     # model = model.to(device).train()
 
     all_loss = []
-
     if Xtilde is None:
-        Xtilde = X.clone()
+        if type(X) is dict:
+            Xtilde = X.copy()
+        else:
+            Xtilde = X.clone()
 
     # X = X.to(device)
     for epoch in tqdm(range(max_iter)):
         loss = model(X, Xtilde)
         # loss = model(X)
 
-        all_loss.append(loss.detach())
+        all_loss.append(loss.item())
 
         if epoch > 5:
             if all_loss[-5] - loss < tol:
