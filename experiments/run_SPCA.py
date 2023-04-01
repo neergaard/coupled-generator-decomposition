@@ -54,7 +54,7 @@ def run_model(M,K):
                     C,S,Bp,Bn = model.get_model_params(X=X[modeltype])
                     init={'Bp':Bp,'Bn':Bn}
                     all_loss[l2,l1] = loss[-1]
-            np.savetxt("data/SPCA_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner),all_loss,deimiter=',')
+            np.savetxt("data/SPCA_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner),all_loss,delimiter=',')
 
 if __name__=="__main__":
     run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
