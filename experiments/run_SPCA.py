@@ -39,6 +39,8 @@ def run_model(M,K):
     num_iter_outer = 5
     num_iter_inner = 100
 
+    _,_,V = torch.pca_lowrank(X['group_spca'],q=K)
+    init0 = {'Bp':torch.nn.functional.softplus(torch.nn.functional.relu(V)),'Bn':torch.nn.functional.softplus(torch.nn.functional.relu(-V))}
 
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
@@ -46,7 +48,7 @@ def run_model(M,K):
             for l2,lambda2 in enumerate(l2_vals):
                 for l1,lambda1 in enumerate(l1_vals):
                     if l1==0:
-                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
+                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
                     else:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
                     optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
@@ -57,4 +59,5 @@ def run_model(M,K):
             np.savetxt("data/SPCA_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner),all_loss,delimiter=',')
 
 if __name__=="__main__":
-    run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
+    #run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
+    run_model(M=0,K=2)
