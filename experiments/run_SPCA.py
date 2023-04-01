@@ -59,5 +59,5 @@ def run_model(M,K):
             np.savetxt("data/SPCA_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner),all_loss,delimiter=',')
 
 if __name__=="__main__":
-    #run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
-    run_model(M=0,K=2)
+    run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
+    #run_model(M=0,K=2)
