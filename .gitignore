@@ -2,3 +2,4 @@ data/JesperProcessed/
 data/FieldTripProcessed/
 freesurfer/
 slurm/
+submitfiles/*.txt
