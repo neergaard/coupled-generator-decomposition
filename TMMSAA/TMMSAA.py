@@ -62,7 +62,7 @@ class TMMSAA(torch.nn.Module):
 
                 # squeeze if num_modalities is 1 and if no multiple subjects or conditions are presented
                 self.S = torch.nn.Parameter(
-                    self.softmaxS(torch.squeeze(-torch.log(torch.rand(tuple(self.S_size.tolist()), dtype=torch.double))))
+                    self.softmaxS(torch.squeeze(-torch.log(torch.rand(self.S_size, dtype=torch.double))))
                 )
             else:
                 self.C = init['C']
@@ -75,8 +75,8 @@ class TMMSAA(torch.nn.Module):
                 self.Bp = torch.nn.Parameter(torch.rand((torch.sum(C_idx).int(), num_comp), dtype=torch.double))
                 self.Bn = torch.nn.Parameter(torch.rand((torch.sum(C_idx).int(), num_comp), dtype=torch.double))
             else:
-                self.Bp = torch.nn.Parameter(init['Bp'])
-                self.Bn = torch.nn.Parameter(init['Bn'])
+                self.Bp = torch.nn.Parameter(init['Bp'].clone())
+                self.Bn = torch.nn.Parameter(init['Bn'].clone())
 
     def get_model_params(self,X=None):
         with torch.no_grad():
@@ -97,7 +97,7 @@ class TMMSAA(torch.nn.Module):
                     U,_,Vt = torch.linalg.svd(torch.swapaxes(X, -2, -1) @ X@C,full_matrices=False)
                     S = torch.swapaxes(U@Vt,-2,-1)
 
-                return C, S,self.Bp,self.Bn
+                return C, S,self.Bp.detach(),self.Bn.detach()
 
     def eval_model(self, X, Xtilde):
         with torch.no_grad():
@@ -136,27 +136,28 @@ class TMMSAA(torch.nn.Module):
         # in Zou, Hastie, Tibshirani, B is here C and A is here S
         C = Bpsoft - Bnsoft #the minus is important here
 
-        U,Sigma,Vt = torch.linalg.svd(torch.swapaxes(X, -2, -1) @ X@C,full_matrices=False)
+        U,Sigma,Vt = torch.linalg.svd(torch.transpose(X, -2, -1) @ X@C,full_matrices=False)
 
         if X.dim()==2:
             if torch.any(torch.nn.functional.pairwise_distance(Sigma,Sigma,p=1)<1e-15):
                 print("Gradients might be unstable")
                 return
 
-        S = torch.swapaxes(U@Vt,-2,-1)
+        S = torch.transpose(U@Vt,-2,-1)
 
-        XC = Xtilde[..., self.C_idx] @ C
-        XCtXC = torch.swapaxes(XC, -2, -1) @ XC
-        XtXC = torch.swapaxes(X, -2, -1) @ XC
+        #XC = Xtilde[..., self.C_idx] @ C
+        #XCtXC = torch.transpose(XC, -2, -1) @ XC
+        #XtXC = torch.transpose(X, -2, -1) @ XC
 
-        l1 = self.lambda1*torch.sum((Bpsoft+Bnsoft))
-        l2 = self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))
+        #SPCAloss = (
+        #    torch.sum(torch.linalg.matrix_norm(X,ord='fro'))
+        #    - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
+        #    + torch.sum(XCtXC @ S * S)
+        #)
 
-        SPCAloss = (
-            torch.sum(torch.linalg.matrix_norm(X,ord='fro'))
-            - 2 * torch.sum(torch.swapaxes(XtXC, -2, -1) * S)
-            + torch.sum(XCtXC @ S * S) + l1 + l2
-        )
+        #torch.norm(X-Xtilde@C@S)
+        SPCAloss=torch.sum(torch.linalg.matrix_norm(X-Xtilde@C@S,ord='fro')**2)
+
         return SPCAloss
 
     def forward(self, X, Xtilde):
@@ -166,7 +167,6 @@ class TMMSAA(torch.nn.Module):
         elif self.model=='SPCA':
             Bpsoft = self.softplus(self.Bp)
             Bnsoft = self.softplus(self.Bn)
-        
         
         # loop through modalities
         if type(X) is dict:
@@ -185,4 +185,8 @@ class TMMSAA(torch.nn.Module):
                 loss = self.forwardDAA(X, Xtilde,S_soft,C_soft)
             elif self.model == "SPCA":
                 loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft)
+        if self.model=='SPCA':
+            loss+=self.lambda1*torch.sum((Bpsoft+Bnsoft))
+            loss+=self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))
+
         return loss
