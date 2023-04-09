@@ -26,8 +26,8 @@ dims = {'group_spca':X_train_group_spca.shape,'mm_spca':X_train_mm["EEG"].shape,
 #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
 l1_vals = torch.logspace(-3,2,11)
-l1_vals = l1_vals[:5]
-l2 = 0.001
+l1_vals = l1_vals[0:1]
+l2 = 0.0001
 K = 5
 
 num_iter_outer = 1

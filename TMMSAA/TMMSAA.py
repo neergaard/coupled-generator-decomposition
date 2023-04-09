@@ -101,7 +101,30 @@ class TMMSAA(torch.nn.Module):
 
     def eval_model(self, X, Xtilde):
         with torch.no_grad():
-            loss = self.forward(X,Xtilde)
+            if self.model == 'AA' or self.model == 'DAA':
+                S_soft = self.softmaxS(self.S)
+                C_soft = self.softmaxC(self.C)
+            elif self.model=='SPCA':
+                Bpsoft = self.softplus(self.Bp)
+                Bnsoft = self.softplus(self.Bn)
+            
+            # loop through modalities
+            if type(X) is dict:
+                loss = 0
+                for m,key in enumerate(X):
+                    if self.model == "AA":
+                        loss += self.forwardAA(X[key], Xtilde[key],S_soft,C_soft)
+                    elif self.model == "DAA":
+                        loss += self.forwardDAA(X[key], Xtilde[key],S_soft,C_soft)
+                    elif self.model == 'SPCA':
+                        loss += self.forwardSPCA(X[key], Xtilde[key],Bpsoft,Bnsoft)
+            else:
+                if self.model == "AA":
+                    loss = self.forwardAA(X, Xtilde,S_soft,C_soft)
+                elif self.model == "DAA":
+                    loss = self.forwardDAA(X, Xtilde,S_soft,C_soft)
+                elif self.model == "SPCA":
+                    loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft)
         return loss
 
     def forwardAA(self, X, Xtilde,S_soft,C_soft):

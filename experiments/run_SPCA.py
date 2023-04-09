@@ -66,7 +66,7 @@ def run_model(M,K):
                     init={'Bp':Bp,'Bn':Bn}
 
                     all_test_loss[l2,l1] = model.eval_model(X_test[modeltype],X_test[modeltype])
-                    all_train_loss[l2,l1] = loss[-1]
+                    all_train_loss[l2,l1] = model.eval_model(X_train[modeltype],X_train[modeltype])
             np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
             np.savetxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test_loss,delimiter=',')
 
