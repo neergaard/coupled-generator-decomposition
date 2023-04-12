@@ -26,12 +26,12 @@ dims = {'group_spca':X_train_group_spca.shape,'mm_spca':X_train_mm["EEG"].shape,
 #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
 l1_vals = torch.logspace(-3,2,11)
-l1_vals = l1_vals[0:1]
-l2 = 0.0001
+#l1_vals = l1_vals[0:1]
+l2 = 0.01
 K = 5
 
 num_iter_outer = 1
-num_iter_inner = 1
+num_iter_inner = 10
 
 # Group pca initialization
 _,_,V = torch.pca_lowrank(X['group_spca'],q=K)
@@ -46,15 +46,18 @@ for m,modeltype in enumerate(modeltypes):
     for outer in range(num_iter_outer):
         best_loss = 10000000
         for inner in range(num_iter_inner):
+            fitloss = np.zeros(len(l1_vals))
             for l1,lambda1 in enumerate(l1_vals):
                 if l1==0:
                     model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init0)
                 else:
                     model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init)
-                optimizer = torch.optim.LBFGS(model.parameters(), lr=.1)
-                loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],Optimizer=optimizer,max_iter=10000,tol=1e-3)
+                optimizer = torch.optim.LBFGS(model.parameters(), lr=1)
+                #optimizer = torch.optim.SGD(model.parameters(), lr=.01)
+                loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],Optimizer=optimizer,max_iter=100,tol=1e-6)
                 C,S,Bp,Bn = model.get_model_params(X=X[modeltype])
                 init={'Bp':Bp,'Bn':Bn}
+                fitloss[l1] = model.eval_model(X[modeltype],X[modeltype])
 
                 print('Done with '+modeltype+', outer='+str(outer)+', inner='+str(inner)+', l1_idx='+str(l1))
                 

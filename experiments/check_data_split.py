@@ -28,6 +28,6 @@ X_test = {'group_spca':X_test_group_spca,'mm_spca':X_test_mm,'mmms_spca':X_test_
 
 for s in range(16):
     fig,axs = plt.subplots(2,1)
-    axs[0].plot(X_train_mmms['EEG'][s].T)
-    axs[1].plot(X_test_mmms['EEG'][s].T)
-    h=7
+    axs[0].plot(X_train_mmms['MEG'][s].T)
+    axs[1].plot(X_test_mmms['MEG'][s].T)
+h=7

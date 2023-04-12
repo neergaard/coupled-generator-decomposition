@@ -60,13 +60,15 @@ def run_model(M,K):
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
                     else:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
-                    optimizer = torch.optim.LBFGS(model.parameters(), lr=0.1)
-                    loss = TMMSAA_trainer.Optimizationloop(model=model,X=X_train[modeltype],Optimizer=optimizer,max_iter=10000,tol=1e-3)
+                    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+                    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=0.1, steps_per_epoch=10, epochs=1000)
+                    loss = TMMSAA_trainer.Optimizationloop(model=model,X=X_train[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=10000,tol=1e-3)
                     C,S,Bp,Bn = model.get_model_params(X=X_train[modeltype])
                     init={'Bp':Bp,'Bn':Bn}
 
                     all_test_loss[l2,l1] = model.eval_model(X_test[modeltype],X_test[modeltype])
                     all_train_loss[l2,l1] = model.eval_model(X_train[modeltype],X_train[modeltype])
+                    h=8
             np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
             np.savetxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test_loss,delimiter=',')
 
@@ -74,4 +76,4 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
     else:
-        run_model(M=0,K=2)
+        run_model(M=1,K=5)
