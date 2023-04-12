@@ -31,10 +31,11 @@ class TMMSAA(torch.nn.Module):
     The number of components K is a required input to the mode
     """
 
-    def __init__(self, dimensions, num_modalities=1, num_comp=3, model="AA", C_idx=None,lambda1=None,lambda2=None,init=None):
+    def __init__(self, dimensions, num_modalities=1, num_comp=3, model="AA", C_idx=None,lambda1=None,lambda2=None,init=None,Xsqnorm=None):
         super().__init__()
 
         self.model = model
+        self.Xsqnorm = Xsqnorm
 
         if C_idx is None:
             C_idx = torch.ones(dimensions[-1],dtype=torch.bool)
@@ -99,7 +100,7 @@ class TMMSAA(torch.nn.Module):
 
                 return C, S,self.Bp.detach(),self.Bn.detach()
 
-    def eval_model(self, X, Xtilde):
+    def eval_model(self, Xtrain,Xtraintilde,Xtest):
         with torch.no_grad():
             if self.model == 'AA' or self.model == 'DAA':
                 S_soft = self.softmaxS(self.S)
@@ -107,40 +108,47 @@ class TMMSAA(torch.nn.Module):
             elif self.model=='SPCA':
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
+                C = Bpsoft - Bnsoft 
+                U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain, -2, -1) @ Xtraintilde@C,full_matrices=False)
+                S = torch.transpose(U@Vt,-2,-1)
             
             # loop through modalities
-            if type(X) is dict:
+            if type(Xtest) is dict:
                 loss = 0
-                for m,key in enumerate(X):
+                for m,key in enumerate(Xtest):
                     if self.model == "AA":
-                        loss += self.forwardAA(X[key], Xtilde[key],S_soft,C_soft)
+                        loss += self.SSE(Xtest[key], Xtraintilde[key],C_soft,S_soft)
                     elif self.model == "DAA":
-                        loss += self.forwardDAA(X[key], Xtilde[key],S_soft,C_soft)
+                        loss += self.forwardDAA(Xtest[key], Xtraintilde[key],C_soft,S_soft)
                     elif self.model == 'SPCA':
-                        loss += self.forwardSPCA(X[key], Xtilde[key],Bpsoft,Bnsoft)
+                        loss += self.SSE(Xtest[key], Xtraintilde[key],C,S)
             else:
                 if self.model == "AA":
-                    loss = self.forwardAA(X, Xtilde,S_soft,C_soft)
+                    loss = self.SSE(Xtest, Xtraintilde,C_soft,S_soft)
                 elif self.model == "DAA":
-                    loss = self.forwardDAA(X, Xtilde,S_soft,C_soft)
+                    loss = self.forwardDAA(Xtest, Xtraintilde,C_soft,S_soft)
                 elif self.model == "SPCA":
-                    loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft)
-        return loss
-
-    def forwardAA(self, X, Xtilde,S_soft,C_soft):
-        # this function broadcasts matrix mult for all subjects/conditions
-        XC = Xtilde[..., self.C_idx] @ C_soft
+                    loss = self.SSE(Xtest, Xtraintilde,C,S)
+        return loss.item()
+    
+    def SSE(self,X,Xtilde,C,S,Xsqnorm=None):
+        if Xsqnorm is None:
+            Xsqnorm = torch.sum(torch.linalg.matrix_norm(X,ord='fro')**2)
+        XC = Xtilde[..., self.C_idx] @ C
         XCtXC = torch.swapaxes(XC, -2, -1) @ XC
         XtXC = torch.swapaxes(X, -2, -1) @ XC
 
         SSE = (
-            torch.linalg.matrix_norm(X)
-            - 2 * torch.sum(torch.swapaxes(XtXC, -2, -1) * S_soft)
-            + torch.sum(XCtXC @ S_soft * S_soft)
+            Xsqnorm
+            - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
+            + torch.sum(XCtXC @ S * S)
         )
         return SSE
 
-    def forwardDAA(self, X, Xtilde,S_soft,C_soft):
+    def forwardAA(self, X, Xtilde,C_soft,S_soft,Xsqnorm):
+        return self.SSE(X,Xtilde,C_soft,S_soft,Xsqnorm)
+
+    def forwardDAA(self, X, Xtilde,C_soft,S_soft):
         
         XC = Xtilde[..., self.C_idx] @ C_soft
         XCtXC = torch.swapaxes(XC, -2, -1) @ XC
@@ -155,35 +163,23 @@ class TMMSAA(torch.nn.Module):
             KeyboardInterrupt
         return loss
     
-    def forwardSPCA(self,X,Xtilde,Bpsoft,Bnsoft):
+    def forwardSPCA(self,X,Xtilde,Bpsoft,Bnsoft,Xsqnorm):
         # in Zou, Hastie, Tibshirani, B is here C and A is here S
         C = Bpsoft - Bnsoft #the minus is important here
-
-        U,Sigma,Vt = torch.linalg.svd(torch.transpose(X, -2, -1) @ X@C,full_matrices=False)
-
-        if X.dim()==2:
-            if torch.any(torch.nn.functional.pairwise_distance(Sigma,Sigma,p=1)<1e-15):
-                print("Gradients might be unstable")
-                return
-
+        U,Sigma,Vt = torch.linalg.svd(torch.transpose(X, -2, -1) @ Xtilde@C,full_matrices=False)
         S = torch.transpose(U@Vt,-2,-1)
 
-        #XC = Xtilde[..., self.C_idx] @ C
-        #XCtXC = torch.transpose(XC, -2, -1) @ XC
-        #XtXC = torch.transpose(X, -2, -1) @ XC
-
-        #SPCAloss = (
-        #    torch.sum(torch.linalg.matrix_norm(X,ord='fro'))
-        #    - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
-        #    + torch.sum(XCtXC @ S * S)
-        #)
-
-        #torch.norm(X-Xtilde@C@S)
-        SPCAloss=torch.sum(torch.linalg.matrix_norm(X-Xtilde@C@S,ord='fro')**2)
-
-        return SPCAloss
+        return self.SSE(X,Xtilde,C,S,Xsqnorm)
 
     def forward(self, X, Xtilde):
+        if self.Xsqnorm is None:
+            if type(X) is dict:
+                self.Xsqnorm = {}
+                for key in X:
+                    self.Xsqnorm[key] = torch.sum(torch.linalg.matrix_norm(X[key],ord='fro')**2)
+            else:
+                self.Xsqnorm = torch.sum(torch.linalg.matrix_norm(X,ord='fro')**2)
+
         if self.model == 'AA' or self.model == 'DAA':
             S_soft = self.softmaxS(self.S)
             C_soft = self.softmaxC(self.C)
@@ -196,18 +192,18 @@ class TMMSAA(torch.nn.Module):
             loss = 0
             for m,key in enumerate(X):
                 if self.model == "AA":
-                    loss += self.forwardAA(X[key], Xtilde[key],S_soft,C_soft)
+                    loss += self.forwardAA(X[key], Xtilde[key],C_soft,S_soft,self.Xsqnorm)
                 elif self.model == "DAA":
-                    loss += self.forwardDAA(X[key], Xtilde[key],S_soft,C_soft)
+                    loss += self.forwardDAA(X[key], Xtilde[key],C_soft,S_soft)
                 elif self.model == 'SPCA':
-                    loss += self.forwardSPCA(X[key], Xtilde[key],Bpsoft,Bnsoft)
+                    loss += self.forwardSPCA(X[key], Xtilde[key],Bpsoft,Bnsoft,self.Xsqnorm)
         else:
             if self.model == "AA":
-                loss = self.forwardAA(X, Xtilde,S_soft,C_soft)
+                loss = self.forwardAA(X, Xtilde,C_soft,S_soft,self.Xsqnorm)
             elif self.model == "DAA":
-                loss = self.forwardDAA(X, Xtilde,S_soft,C_soft)
+                loss = self.forwardDAA(X, Xtilde,C_soft,S_soft)
             elif self.model == "SPCA":
-                loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft)
+                loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft,self.Xsqnorm)
         if self.model=='SPCA':
             loss+=self.lambda1*torch.sum((Bpsoft+Bnsoft))
             loss+=self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))

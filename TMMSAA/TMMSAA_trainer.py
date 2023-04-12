@@ -23,7 +23,7 @@ def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=1
     for epoch in tqdm(range(max_iter)):
         loss = model(X, Xtilde)
         all_loss.append(loss.item())
-        if epoch > 5:
+        if epoch > 20:
             if all_loss[-5] - loss < tol:
                 break
         optimizer.zero_grad()
