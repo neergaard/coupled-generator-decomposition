@@ -41,9 +41,9 @@ def run_model(M,K):
     dims = {'group_spca':Xtrain_group_spca.shape,'mm_spca':Xtrain_mm["EEG"].shape,'mmms_spca':Xtrain_mmms["EEG"].shape}
     #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
-    l1_vals = torch.logspace(-5,2,11)
-    l2_vals = torch.logspace(-5,2,15)
-    l2_vals = l2_vals[2:]
+    l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,15)))
+    l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,15)))
+    #l2_vals = l2_vals[2:]
 
     num_iter_outer = 5
     num_iter_inner = 100
@@ -57,7 +57,7 @@ def run_model(M,K):
             all_test_loss = np.zeros((len(l2_vals),len(l1_vals)))
             for l2,lambda2 in enumerate(l2_vals):
                 for l1,lambda1 in enumerate(l1_vals):
-                    if l1==0:
+                    if l1==0 or l1==1:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
                     else:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
@@ -69,7 +69,6 @@ def run_model(M,K):
 
                     all_test_loss[l2,l1] = model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
                     all_train_loss[l2,l1] = loss[-1]
-                    h=8
             np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
             np.savetxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test_loss,delimiter=',')
 
@@ -77,4 +76,4 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         run_model(M=int(sys.argv[1]),K=int(sys.argv[2]))
     else:
-        run_model(M=0,K=5)
+        run_model(M=2,K=5)

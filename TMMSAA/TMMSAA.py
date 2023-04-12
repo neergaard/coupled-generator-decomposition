@@ -109,8 +109,6 @@ class TMMSAA(torch.nn.Module):
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
                 C = Bpsoft - Bnsoft 
-                U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain, -2, -1) @ Xtraintilde@C,full_matrices=False)
-                S = torch.transpose(U@Vt,-2,-1)
             
             # loop through modalities
             if type(Xtest) is dict:
@@ -121,6 +119,8 @@ class TMMSAA(torch.nn.Module):
                     elif self.model == "DAA":
                         loss += self.forwardDAA(Xtest[key], Xtraintilde[key],C_soft,S_soft)
                     elif self.model == 'SPCA':
+                        U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
+                        S = torch.transpose(U@Vt,-2,-1)
                         loss += self.SSE(Xtest[key], Xtraintilde[key],C,S)
             else:
                 if self.model == "AA":
@@ -128,6 +128,8 @@ class TMMSAA(torch.nn.Module):
                 elif self.model == "DAA":
                     loss = self.forwardDAA(Xtest, Xtraintilde,C_soft,S_soft)
                 elif self.model == "SPCA":
+                    U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain, -2, -1) @ Xtraintilde@C,full_matrices=False)
+                    S = torch.transpose(U@Vt,-2,-1)
                     loss = self.SSE(Xtest, Xtraintilde,C,S)
         return loss.item()
     
@@ -163,9 +165,8 @@ class TMMSAA(torch.nn.Module):
             KeyboardInterrupt
         return loss
     
-    def forwardSPCA(self,X,Xtilde,Bpsoft,Bnsoft,Xsqnorm):
+    def forwardSPCA(self,X,Xtilde,C,Xsqnorm):
         # in Zou, Hastie, Tibshirani, B is here C and A is here S
-        C = Bpsoft - Bnsoft #the minus is important here
         U,Sigma,Vt = torch.linalg.svd(torch.transpose(X, -2, -1) @ Xtilde@C,full_matrices=False)
         S = torch.transpose(U@Vt,-2,-1)
 
@@ -186,24 +187,25 @@ class TMMSAA(torch.nn.Module):
         elif self.model=='SPCA':
             Bpsoft = self.softplus(self.Bp)
             Bnsoft = self.softplus(self.Bn)
+            C = Bpsoft - Bnsoft 
         
         # loop through modalities
         if type(X) is dict:
             loss = 0
             for m,key in enumerate(X):
                 if self.model == "AA":
-                    loss += self.forwardAA(X[key], Xtilde[key],C_soft,S_soft,self.Xsqnorm)
+                    loss += self.forwardAA(X[key], Xtilde[key],C_soft,S_soft,self.Xsqnorm[key])
                 elif self.model == "DAA":
                     loss += self.forwardDAA(X[key], Xtilde[key],C_soft,S_soft)
                 elif self.model == 'SPCA':
-                    loss += self.forwardSPCA(X[key], Xtilde[key],Bpsoft,Bnsoft,self.Xsqnorm)
+                    loss += self.forwardSPCA(X[key], Xtilde[key],C,self.Xsqnorm[key])
         else:
             if self.model == "AA":
                 loss = self.forwardAA(X, Xtilde,C_soft,S_soft,self.Xsqnorm)
             elif self.model == "DAA":
                 loss = self.forwardDAA(X, Xtilde,C_soft,S_soft)
             elif self.model == "SPCA":
-                loss = self.forwardSPCA(X, Xtilde,Bpsoft,Bnsoft,self.Xsqnorm)
+                loss = self.forwardSPCA(X, Xtilde,C,self.Xsqnorm)
         if self.model=='SPCA':
             loss+=self.lambda1*torch.sum((Bpsoft+Bnsoft))
             loss+=self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))
