@@ -56,19 +56,21 @@ num_iter_inner = 20
 for K in range(2,21):
 
     # Model: group PCA
-    U_group_pca,Sigma_group_pca,V_group_pca = torch.pca_lowrank(Xtrain['group_daa'],q=K,niter=100)
-    group_pca_train_loss = torch.norm(Xtrain['group_daa']-U_group_pca@torch.diag(Sigma_group_pca)@V_group_pca.T)**2
-    group_pca_test_loss = torch.norm(Xtest['group_daa']-U_group_pca@torch.diag(Sigma_group_pca)@V_group_pca.T)**2
+    #U_group_pca,Sigma_group_pca,V_group_pca = torch.pca_lowrank(Xtrain['group_daa'],q=K,niter=100)
+    #group_pca_train_loss = torch.norm(Xtrain['group_daa']-U_group_pca@torch.diag(Sigma_group_pca)@V_group_pca.T)**2
+    #group_pca_test_loss = torch.norm(Xtest['group_daa']-U_group_pca@torch.diag(Sigma_group_pca)@V_group_pca.T)**2
 
-    np.savetxt("data/DAA_results/train_test_loss_PCA_K="+str(K)+'.txt',np.array((group_pca_train_loss,group_pca_test_loss)),delimiter=',')
+    #np.savetxt("data/PCAICA_results/train_test_loss_PCA_K="+str(K)+'.txt',np.array((group_pca_train_loss,group_pca_test_loss)),delimiter=',')
 
     # Model: group ICA
-    A_group_ica,S_group_ica,_ = ica1(x_raw=Xtrain_group_daa,ncomp=K)
-    group_ica_train_loss = torch.norm(Xtrain['group_daa']-A_group_ica@S_group_ica)**2
-    group_ica_test_loss = torch.norm(Xtest['group_daa']-A_group_ica@S_group_ica)**2
-    np.savetxt("data/DAA_results/train_test_loss_ICA_K="+str(K)+'.txt',np.array((group_ica_train_loss,group_ica_test_loss)),delimiter=',')
-
+    #A_group_ica,S_group_ica,_ = ica1(x_raw=Xtrain_group_daa,ncomp=K)
+    #group_ica_train_loss = torch.norm(Xtrain['group_daa']-A_group_ica@S_group_ica)**2
+    #group_ica_test_loss = torch.norm(Xtest['group_daa']-A_group_ica@S_group_ica)**2
+    #np.savetxt("data/PCAICA_results/train_test_loss_ICA_K="+str(K)+'.txt',np.array((group_ica_train_loss,group_ica_test_loss)),delimiter=',')
+    
     for m,modeltype in enumerate(daa_modeltypes):
+        if m==0 or m==1:
+            continue
         if os.path.isfile("data/DAA_results/train_loss_"+modeltype+"_K="+str(K)+'.txt'):
             continue
         daa_train_loss = np.zeros((num_iter_outer,num_iter_inner))
@@ -83,4 +85,4 @@ for K in range(2,21):
                 daa_test_loss[outer,inner] = model.eval_model(Xtrain=None,Xtraintilde=Xtraintilde[modeltype],Xtest=Xtest[modeltype])
                 daa_train_loss[outer,inner] = loss[-1]
         np.savetxt("data/DAA_results/train_loss_"+modeltype+"_K="+str(K)+'_Watson.txt',daa_train_loss,delimiter=',')
-        np.savetxt("data/DAA_results/test_loss_"+modeltype+"_K="+str(K)+'_Watson.txt',daa_test_loss,delimiter=',')
+        np.savetxt("data/DAA_results/test_loss_"+modeltype+"_K="+str(K)+'_SEE.txt',daa_test_loss,delimiter=',')
