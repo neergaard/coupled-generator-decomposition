@@ -4,8 +4,8 @@ import torch
 
 
 def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=100, tol=1e-10):
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    # model = model.to(device).train()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device).train()
 
     all_loss = []
     lrs = []

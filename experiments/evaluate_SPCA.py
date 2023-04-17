@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 modeltypes = ['group_spca','mm_spca','mmms_spca']
 modality_names = ["EEG", "MEG"]
 
-l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
-l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
+l1_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
+l2_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
 
 num_iter_outer = 5
 num_iter_inner = 100
@@ -30,7 +30,7 @@ for m,modeltype in enumerate(modeltypes):
         ax[m,k].imshow(np.nanmean(loss,axis=0),vmin=0,vmax=100)
         ax[m,k].set_title(modeltype+', K='+str(K))
         if m==2:
-            ax[m,k].set_xticks(ticks=np.arange(len(l1_vals)),labels=l1_vals)
+            ax[m,k].set_xticks(ticks=np.arange(len(l1_vals)),labels=l1_vals,rotation = 45)
         else:
             ax[m,k].set_xticks([])
         if k==0:
@@ -41,6 +41,7 @@ for m,modeltype in enumerate(modeltypes):
             ax[m,k].colorbar()
         
         best_loss[m,k] = np.nanmin(np.nanmean(loss,axis=0))
+        
 
 plt.figure()
 plt.plot(num_comps,best_loss.T)
