@@ -3,7 +3,7 @@ import os.path
 import torch
 import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer
-from ica import ica1
+#from ica import ica1
 #from TMMSAA.TMMSAA import SSE
 torch.set_num_threads(16)
 def run_model(M,K):
