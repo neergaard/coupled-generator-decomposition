@@ -83,6 +83,6 @@ for K in range(2,21):
                 loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],Xtilde=Xtraintilde[modeltype],optimizer=optimizer,max_iter=10000,tol=1e-4)
 
                 daa_test_loss[outer,inner] = model.eval_model(Xtrain=None,Xtraintilde=Xtraintilde[modeltype],Xtest=Xtest[modeltype])
-                daa_train_loss[outer,inner] = loss[-1]
-        np.savetxt("data/DAA_results/train_loss_"+modeltype+"_K="+str(K)+'_Watson.txt',daa_train_loss,delimiter=',')
+                daa_train_loss[outer,inner] = model.eval_model(Xtrain=None,Xtraintilde=Xtraintilde[modeltype],Xtest=Xtrain[modeltype])
+        np.savetxt("data/DAA_results/train_loss_"+modeltype+"_K="+str(K)+'_SSE.txt',daa_train_loss,delimiter=',')
         np.savetxt("data/DAA_results/test_loss_"+modeltype+"_K="+str(K)+'_SEE.txt',daa_test_loss,delimiter=',')
