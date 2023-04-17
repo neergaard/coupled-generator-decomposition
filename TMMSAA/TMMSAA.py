@@ -118,6 +118,7 @@ class TMMSAA(torch.nn.Module):
                         loss += self.SSE(Xtest[key], Xtraintilde[key],C_soft,S_soft)
                     elif self.model == "DAA":
                         loss += self.forwardDAA(Xtest[key], Xtraintilde[key],C_soft,S_soft)
+                        #loss += self.SSE(Xtest[key], Xtraintilde[key],C_soft,S_soft)
                     elif self.model == 'SPCA':
                         U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
                         S = torch.transpose(U@Vt,-2,-1)
@@ -127,6 +128,7 @@ class TMMSAA(torch.nn.Module):
                     loss = self.SSE(Xtest, Xtraintilde,C_soft,S_soft)
                 elif self.model == "DAA":
                     loss = self.forwardDAA(Xtest, Xtraintilde,C_soft,S_soft)
+                    #loss = self.SSE(Xtest, Xtraintilde,C_soft,S_soft)
                 elif self.model == "SPCA":
                     U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain, -2, -1) @ Xtraintilde@C,full_matrices=False)
                     S = torch.transpose(U@Vt,-2,-1)
