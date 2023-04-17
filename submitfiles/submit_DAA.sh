@@ -1,11 +1,11 @@
 #!/bin/sh
 #BSUB -J real_fit_job
-#BSUB -q hpc
-#BSUB -R "rusage[mem=1GB]"
+#BSUB -q computebigbigmem
+#BSUB -R "rusage[mem=2GB]"
 #BSUB -o real_fit_job_out_%J.txt
 #BSUB -e real_fit_job_err_%J.txt
 #BSUB -W 48:00 
-#BSUB -n 8
+#BSUB -n 16
 #BSUB -R "span[hosts=1]"
 
 # -- commands you want to execute -- 
