@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 modeltypes = ['group_spca','mm_spca','mmms_spca']
 modality_names = ["EEG", "MEG"]
 
-l1_vals = np.logspace(-3,2,11)
-l2_vals = np.logspace(-5,0,11)
+l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
+l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
 
 num_iter_outer = 5
 num_iter_inner = 100
