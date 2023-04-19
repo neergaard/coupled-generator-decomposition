@@ -16,4 +16,4 @@ python3 -m pip install --user ica
 cd ..
 
 # pip install .
-python3 experiments/run_PCA_ICA_DAA.py
+python3 experiments/run_DAA.py

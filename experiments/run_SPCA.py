@@ -74,9 +74,10 @@ def run_model(M,K):
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
                     else:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
+                    
                     optimizer = torch.optim.SGD(model.parameters(), lr=1)
                     scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1, steps_per_epoch=10, epochs=1000,div_factor=10000,pct_start=0.3)
-                    loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=10000,tol=1e-4)
+                    loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=10000,tol=1e-3)
                     C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
                     init={'Bp':Bp,'Bn':Bn}
 

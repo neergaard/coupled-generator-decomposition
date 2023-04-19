@@ -26,6 +26,27 @@ for split in range(2):
     torch.save(X_EEG,'data/concatenatedData/X_EEG_FT_frob'+str(split)+'.pt')
     torch.save(X_MEG,'data/concatenatedData/X_MEG_FT_frob'+str(split)+'.pt')
 
+for split in range(2):
+    # %% evoked potentials, l2 normalized
+    X_EEG = torch.zeros(num_subjects,len(conditions),70,180,dtype=torch.double)
+    X_MEG = torch.zeros(num_subjects,len(conditions),102,180,dtype=torch.double)
+
+    for sub in range(num_subjects):
+        for cond_idx,cond in enumerate(conditions):
+            
+            # EEG
+            data = np.genfromtxt('data/FieldTripProcessed/sub'+str(sub+1)+'EEG'+cond+'_l2norm'+str(split+1)+'_12-Apr-2023.csv',delimiter=',')
+            data = torch.tensor(data)
+            X_EEG[sub,cond_idx] = data
+
+            # MEG
+            data = np.genfromtxt('data/FieldTripProcessed/sub'+str(sub+1)+'MEGMAG'+cond+'_l2norm'+str(split+1)+'_12-Apr-2023.csv',delimiter=',')
+            data = torch.tensor(data)
+            X_MEG[sub,cond_idx] = data
+
+    torch.save(X_EEG,'data/concatenatedData/X_EEG_FT_l2'+str(split)+'.pt')
+    torch.save(X_MEG,'data/concatenatedData/X_MEG_FT_l2'+str(split)+'.pt')
+
 # %% flipped EEG, l2 normalized
 X_EEG = torch.zeros(2,num_subjects,len(conditions),70,180,dtype=torch.double)
     

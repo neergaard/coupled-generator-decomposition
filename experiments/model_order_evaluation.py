@@ -2,13 +2,13 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-modeltypes = ['group_spca','mm_spca','mmms_spca','pca','ica','daa']
+modeltypes = ['group_spca','mm_spca','mmms_spca','group_pca','group_ica','mmms_daa']
 modality_names = ["EEG", "MEG"]
 
 num_iter_outer = 5
 num_iter_inner = 20
 
-num_comps = np.arange(2,21)
+num_comps = np.arange(2,31)
 
 best_train_loss = np.zeros((len(modeltypes),len(num_comps)))
 best_test_loss = np.zeros((len(modeltypes),len(num_comps)))
@@ -16,43 +16,49 @@ best_test_loss = np.zeros((len(modeltypes),len(num_comps)))
 for k,K in enumerate(num_comps):
     for m,modeltype in enumerate(modeltypes):
 
-        if modeltype is 'pca':
+        if modeltype == 'group_pca':
             loss = np.genfromtxt('data/PCAICA_results/train_test_loss_PCA_K='+str(K)+'.txt')
             best_train_loss[m,k] = loss[0]
             best_test_loss[m,k] = loss[1]
-        elif modeltype is 'ica':
+        elif modeltype == 'group_ica':
             loss = np.genfromtxt('data/PCAICA_results/train_test_loss_ICA_K='+str(K)+'.txt')
             best_train_loss[m,k] = loss[0]
             best_test_loss[m,k] = loss[1]
-        elif modeltype is 'daa':
-            train_loss = np.genfromtxt('data/DAA_results/train_loss_ICA_K='+str(K)+'.txt')
+        elif modeltype == 'mmms_daa':
+            continue
+            train_loss = np.genfromtxt('data/DAA_results/train_loss_mmms_daa_K='+str(K)+'_SSE.txt')
+            test_loss = np.genfromtxt('data/DAA_results/train_loss_mmms_daa_K='+str(K)+'_SSE.txt')
+            best_train_loss[m,k] = np.nanmean(np.nanmin(train_loss,axis=1))
+            best_test_loss[m,k] = np.nanmean(np.nanmin(test_loss,axis=1))
+        else:
 
-
-        loss = np.zeros((num_iter_outer))
-        for outer in range(num_iter_outer):
-            allinner = np.zeros((num_iter_inner,len(l1_vals),len(l2_vals)))
-            for inner in range(num_iter_inner):
+            train_loss = np.zeros((num_iter_outer,num_iter_inner))
+            test_loss = np.zeros((num_iter_outer,num_iter_inner))
+            for outer in range(num_iter_outer):
+                for inner in range(num_iter_inner):
+                    try:
+                        loss=np.genfromtxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                        train_loss[outer,inner] = loss[0,0]
+                        loss=np.genfromtxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                        test_loss[outer,inner] = loss[0,0]
+                    except:
+                        train_loss[outer,inner] = np.nan
+                        test_loss[outer,inner] = np.nan
                 try:
-                    allinner[inner]=np.genfromtxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                    best_train_inner_idx = np.nanargmin(train_loss,axis=1)
+                    best_test_inner = test_loss[best_train_inner_idx]
                 except:
-                    allinner[inner] = np.nan
-            loss[outer] = np.nanmin(allinner,axis=0)
-        ax[m,k].imshow(np.nanmean(loss,axis=0),vmin=0,vmax=100)
-        ax[m,k].set_title(modeltype+', K='+str(K))
-        if m==2:
-            ax[m,k].set_xticks(ticks=np.arange(len(l1_vals)),labels=l1_vals,rotation = 45)
-        else:
-            ax[m,k].set_xticks([])
-        if k==0:
-            ax[m,k].set_yticks(ticks=np.arange(len(l2_vals)),labels=l2_vals)
-        else:
-            ax[m,k].set_yticks([])
-        if k==9:
-            ax[m,k].colorbar()
+                    best_test_inner = np.nanmin(test_loss,axis=1)
+            best_train_loss[m,k] = np.nanmean(np.nanmin(train_loss,axis=1))
+            best_test_loss[m,k] = np.nanmean(best_test_inner)
         
-        best_loss[m,k] = np.nanmin(np.nanmean(loss,axis=0))
         
-
 plt.figure()
-plt.plot(num_comps,best_loss.T)
+plt.plot(num_comps,best_train_loss.T)
+plt.legend(modeltypes)
+plt.ylim(10,60)
+plt.figure()
+plt.plot(num_comps,best_test_loss.T)
+plt.legend(modeltypes)
+plt.ylim(10,60)
 h = 7
