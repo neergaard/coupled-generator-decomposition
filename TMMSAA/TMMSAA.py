@@ -1,6 +1,5 @@
 # Torch file specifying trimodal, multisubject AA
 import torch
-import quadprog
 
 
 class TMMSAA(torch.nn.Module):
@@ -136,7 +135,6 @@ class TMMSAA(torch.nn.Module):
                     loss = self.SSE(Xtest, Xtraintilde,C,S)
         return loss.item()
     
-
     def SSE(self,X,Xtilde,C,S,Xsqnorm=None):
         if Xsqnorm is None:
             Xsqnorm = torch.sum(torch.linalg.matrix_norm(X,ord='fro')**2)

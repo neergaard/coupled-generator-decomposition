@@ -2,13 +2,22 @@ import numpy as np
 import torch
 import quadprog
 
-def larsqp(X,Xtilde,Bn,Bp):
+def larsqp(X,Bn,Bp,lambda1,lambda2):
     
-    U,Sigma,Vt = np.linalg.svd(np.transpose(X, -2, -1) @ X@(Bp-Bn),full_matrices=False)
-    S = torch.transpose(U@Vt,-2,-1)
+    if type(X) is dict:
+        S_shape = (len(X),*next(iter(X.values())).shape)
+        S_shape = (*S_shape[:-2],S_shape[-1])
+        S = np.zeros(S_shape)
+        for m,key in enumerate(X):
+            U,Sigma,Vt = np.linalg.svd(np.transpose(X[key], axes=(-2, -1)) @ X[key] @ (Bp-Bn),full_matrices=False)
+            S[m] = torch.transpose(U@Vt,axes=(-2, -1))
+    else:
+        U,Sigma,Vt = np.linalg.svd(np.transpose(X, axes=(-2, -1)) @ X@(Bp-Bn),full_matrices=False)
+        S = torch.transpose(U@Vt,axes=(-2, -1))
+        
 
     XtX = torch.transpose(X,dim=(-2,-1))@X
-    XtX_lambda2 = 2*torch.sum(XtX,dim=0) + self.lambda2*torch.eye(X.shape[-1])
+    XtX_lambda2 = 2*torch.sum(XtX,dim=0) + lambda2*torch.eye(X.shape[-1])
     SXtX = 2*S@XtX
     XtX_minus = -2*torch.sum(XtX,dim=0)
 

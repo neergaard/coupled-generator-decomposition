@@ -67,4 +67,6 @@ def load_data():
     Xtest2_group_spca = torch.cat((Xtest2_mm['EEG'],Xtest2_mm['MEG']),dim=-2)
     Xtest2 = {'group_spca':Xtest2_group_spca,'mm_spca':Xtest2_mm,'mmms_spca':Xtest2_mmms}
 
+
+
     return Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2

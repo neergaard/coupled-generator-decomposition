@@ -1,17 +1,17 @@
 # optimization loop
 from tqdm import tqdm
-import torch
-from larsqp import larsqp
+import numpy as np
+from TMMSAA import larsqp
 
 def Optimizationloop(model, X,num_comp,max_iter=100, tol=1e-10):
     
     all_loss = []
-    Bp = torch.rand((X.shape[-1], num_comp))
-    Bn = torch.rand((X.shape[-1], num_comp))
+    Bp = np.rand((X.shape[-1], num_comp))
+    Bn = np.rand((X.shape[-1], num_comp))
 
     for epoch in tqdm(range(max_iter)):
         Bp,Bn = larsqp(X,Bp,Bn)
-        loss = model(X, )
+        loss = np.linalg.norm()
         all_loss.append(loss.item())
 
         if epoch>100:
@@ -19,5 +19,5 @@ def Optimizationloop(model, X,num_comp,max_iter=100, tol=1e-10):
                 break
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
-    best_loss = torch.min(all_loss)
+    best_loss = min(all_loss)
     return all_loss, best_loss
