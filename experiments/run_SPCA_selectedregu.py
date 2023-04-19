@@ -25,9 +25,9 @@ times = torch.load("data/MEEGtimes.pt")
 dims = {'group_spca':X_train_group_spca.shape,'mm_spca':X_train_mm["EEG"].shape,'mmms_spca':X_train_mmms["EEG"].shape}
 #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
-l1_vals = torch.logspace(-3,2,11)
-#l1_vals = l1_vals[0:1]
-l2 = 0.01
+l1_vals = torch.logspace(-5,2,8)
+l1_vals = l1_vals[0:4]
+l2 = 0.0
 K = 5
 
 num_iter_outer = 1
@@ -41,23 +41,25 @@ modeltype_best_models = []
 best_models = []
 best_losses = np.zeros((3,num_iter_outer))
 for m,modeltype in enumerate(modeltypes):
-    if m==0:
+    if m==0 or m==1:
         continue
     for outer in range(num_iter_outer):
         best_loss = 10000000
         for inner in range(num_iter_inner):
             fitloss = np.zeros(len(l1_vals))
+            loss_l1 = []
             for l1,lambda1 in enumerate(l1_vals):
                 if l1==0:
                     model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init0)
                 else:
                     model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init)
-                optimizer = torch.optim.LBFGS(model.parameters(), lr=1)
-                #optimizer = torch.optim.SGD(model.parameters(), lr=.01)
-                loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],Optimizer=optimizer,max_iter=100,tol=1e-6)
+                optimizer = torch.optim.SGD(model.parameters(), lr=1)
+                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1, steps_per_epoch=10, epochs=1000,div_factor=10000,pct_start=0.3)
+                loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=10000,tol=1e-3)
                 C,S,Bp,Bn = model.get_model_params(X=X[modeltype])
                 init={'Bp':Bp,'Bn':Bn}
-                fitloss[l1] = model.eval_model(X[modeltype],X[modeltype])
+                fitloss[l1] = model.eval_model(Xtrain=X[modeltype],Xtraintilde=X[modeltype],Xtest=X[modeltype])
+                loss_l1.append(loss)
 
                 print('Done with '+modeltype+', outer='+str(outer)+', inner='+str(inner)+', l1_idx='+str(l1))
                 

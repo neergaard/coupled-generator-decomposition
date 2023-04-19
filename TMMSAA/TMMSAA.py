@@ -1,5 +1,6 @@
 # Torch file specifying trimodal, multisubject AA
 import torch
+import quadprog
 
 
 class TMMSAA(torch.nn.Module):
@@ -135,20 +136,22 @@ class TMMSAA(torch.nn.Module):
                     loss = self.SSE(Xtest, Xtraintilde,C,S)
         return loss.item()
     
+
     def SSE(self,X,Xtilde,C,S,Xsqnorm=None):
         if Xsqnorm is None:
             Xsqnorm = torch.sum(torch.linalg.matrix_norm(X,ord='fro')**2)
         XC = Xtilde[..., self.C_idx] @ C
-        XCtXC = torch.swapaxes(XC, -2, -1) @ XC
         XtXC = torch.swapaxes(X, -2, -1) @ XC
 
         SSE = (
             Xsqnorm
             - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
-            + torch.sum(XCtXC @ S * S)
+            + torch.sum(XC*XC)
         )
-        return SSE
+        # the last element was torch.sum(XCtXC@S*S) until we realized that S is orthogonal, i.e., SS.T = eye
 
+        return SSE
+    
     def forwardAA(self, X, Xtilde,C_soft,S_soft,Xsqnorm):
         return self.SSE(X,Xtilde,C_soft,S_soft,Xsqnorm)
 

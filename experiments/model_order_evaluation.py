@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-modeltypes = ['group_spca','mm_spca','mmms_spca','group_pca','group_ica','mmms_daa']
+modeltypes = ['group_spca','mm_spca','mmms_spca','group_pca','group_ica','mmms_daa','group_spca_lars']
 modality_names = ["EEG", "MEG"]
 
 num_iter_outer = 5
@@ -42,8 +42,14 @@ for k,K in enumerate(num_comps):
                         loss=np.genfromtxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
                         test_loss[outer,inner] = loss[0,0]
                     except:
-                        train_loss[outer,inner] = np.nan
-                        test_loss[outer,inner] = np.nan
+                        try:
+                            loss=np.genfromtxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                            train_loss[outer,inner] = loss
+                            loss=np.genfromtxt("data/SPCA_results/test_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                            test_loss[outer,inner] = loss
+                        except:
+                            train_loss[outer,inner] = np.nan
+                            test_loss[outer,inner] = np.nan
                 try:
                     best_train_inner_idx = np.nanargmin(train_loss,axis=1)
                     best_test_inner = test_loss[best_train_inner_idx]
@@ -57,8 +63,12 @@ plt.figure()
 plt.plot(num_comps,best_train_loss.T)
 plt.legend(modeltypes)
 plt.ylim(10,60)
+plt.title('Train loss')
+plt.xlabel('Model order (K)')
 plt.figure()
 plt.plot(num_comps,best_test_loss.T)
 plt.legend(modeltypes)
 plt.ylim(10,60)
+plt.title('Test loss')
+plt.xlabel('Model order (K)')
 h = 7

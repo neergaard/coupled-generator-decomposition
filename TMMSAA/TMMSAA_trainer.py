@@ -23,9 +23,9 @@ def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=1
     for epoch in tqdm(range(max_iter)):
         loss = model(X, Xtilde)
         all_loss.append(loss.item())
-        if epoch > 5:
-            if all_loss[-5] - loss < 0:
-                break
+        #if epoch > 100:
+        #    if all_loss[-5] - loss < 0:
+        #        break
         if epoch>100:
             if all_loss[-5] - loss < tol:
                 break
@@ -37,4 +37,5 @@ def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=1
             scheduler.step()
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
-    return all_loss
+    best_loss = min(all_loss)
+    return all_loss, best_loss

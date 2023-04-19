@@ -27,6 +27,9 @@ for m,modeltype in enumerate(modeltypes):
                 except:
                     allinner[inner] = np.nan
             loss[outer] = np.nanmin(allinner,axis=0)
+        if m==2 and K==5:
+            h=7
+
         ax[m,k].imshow(np.nanmean(loss,axis=0),vmin=0,vmax=100)
         ax[m,k].set_title(modeltype+', K='+str(K))
         if m==2:
@@ -45,4 +48,5 @@ for m,modeltype in enumerate(modeltypes):
 
 plt.figure()
 plt.plot(num_comps,best_loss.T)
+
 h = 7
