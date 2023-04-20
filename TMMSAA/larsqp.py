@@ -1,34 +1,58 @@
 import numpy as np
-import torch
-import quadprog
+import cvxopt
+cvxopt.solvers.options['show_progress'] = False
+#import quadprog
 
-def larsqp(X,Bn,Bp,lambda1,lambda2):
-    
-    if type(X) is dict:
+
+def larsqp(X,Bp,Bn,lambda1,lambda2,XtX=None):
+    T,K = Bp.shape #number of timepoints and components
+
+    if type(X) is dict: #if input data is multimodal
         S_shape = (len(X),*next(iter(X.values())).shape)
-        S_shape = (*S_shape[:-2],S_shape[-1])
+        S_shape = (*S_shape[:-2],K,T)
         S = np.zeros(S_shape)
-        for m,key in enumerate(X):
-            U,Sigma,Vt = np.linalg.svd(np.transpose(X[key], axes=(-2, -1)) @ X[key] @ (Bp-Bn),full_matrices=False)
-            S[m] = torch.transpose(U@Vt,axes=(-2, -1))
-    else:
-        U,Sigma,Vt = np.linalg.svd(np.transpose(X, axes=(-2, -1)) @ X@(Bp-Bn),full_matrices=False)
-        S = torch.transpose(U@Vt,axes=(-2, -1))
         
+        if XtX is None:
+            XtX_shape = (*S_shape[:-2],T,T)
+            XtX = np.zeros(XtX_shape)
+            for m,key in enumerate(X):
+                XtX[m] = np.swapaxes(X[key],-2,-1)@X[key]
 
-    XtX = torch.transpose(X,dim=(-2,-1))@X
-    XtX_lambda2 = 2*torch.sum(XtX,dim=0) + lambda2*torch.eye(X.shape[-1])
-    SXtX = 2*S@XtX
-    XtX_minus = -2*torch.sum(XtX,dim=0)
+        for m,key in enumerate(X):
+            U,Sigma,Vt = np.linalg.svd(XtX[m] @ (Bp-Bn),full_matrices=False)
+            S[m] = np.swapaxes(U@Vt,-2, -1)
+            
 
-    P = torch.cat(XtX_lambda2,XtX_minus,dim=-1)
-    P = torch.cat(P,torch.cat(XtX_minus,XtX_lambda2,dim=-1),dim=-2)
+        # the sum is taken over modalities and subjects
+        XtX_sum = np.sum(XtX,axis=(0,1))
+        SXtX = 2*np.sum(S@XtX,axis=(0,1))
+        
+    else:
+        if XtX is None:
+            XtX = np.swapaxes(X,-2,-1)@X
+        U,Sigma,Vt = np.linalg.svd(XtX@(Bp-Bn),full_matrices=False)
+        S = np.swapaxes(U@Vt,-2, -1)
 
-    Q = torch.cat(SXtX,-SXtX,dim=-1) #vektor, T lang
-    G = -torch.eye(2*X.shape[-1])
-    h = torch.zeros(2*X.shape[-1])
-    for k in Bn.shape[1]:
-        sol=quadprog.cvxopt_solve_qp(P,q=Q[k,:].T,G=G,h=h)
-        Bp[k] = sol[:X.shape[-1]/2] #første halvdel
-        Bn[k] = sol[X.shape[-1]/2:] #anden halvdel
-    return Bp, Bn
+        XtX_sum = np.sum(XtX,axis=0)
+        SXtX = 2*np.sum(S@XtX,axis=0)
+    
+    XtX_lambda2 = 2*XtX_sum + lambda2*np.eye(T)
+    XtX_minus = -2*XtX_sum
+    #SXtX = 2*S@XtX
+
+
+    P = np.concatenate((XtX_lambda2,XtX_minus),axis=1)
+    P = cvxopt.matrix(np.concatenate((P,np.concatenate((XtX_minus,XtX_lambda2),axis=-1)),axis=-2))
+    #P = np.concatenate((P,np.concatenate((XtX_minus,XtX_lambda2),axis=-1)),axis=-2)
+
+    Q = -np.concatenate((SXtX,-SXtX),axis=1)+lambda1 #vektor, 2T lang
+    G = cvxopt.matrix(-np.eye(2*T))
+    h = cvxopt.matrix(np.zeros(2*T))
+    #G = -np.eye(2*T)
+    #h = np.zeros(2*T)
+    for k in range(K):
+        sol = np.array(cvxopt.solvers.qp(P,cvxopt.matrix(Q[k,:].T),G,h)['x']).reshape(2*T,)
+        #sol = quadprog.solve_qp(P,-Q[k],-G,h)[0]
+        Bp[:,k] = sol[:T] #første halvdel
+        Bn[:,k] = sol[T:] #anden halvdel
+    return Bp, Bn, S
