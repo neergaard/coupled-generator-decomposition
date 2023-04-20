@@ -2,26 +2,62 @@
 from tqdm import tqdm
 import numpy as np
 from TMMSAA import larsqp
+import cvxopt
 
-def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10):
+def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None):
     
     all_loss = []
-    if type(X) is dict:
-        B_shape = next(iter(X.values())).shape[-1]
+    if type(X) is dict: #if input data is multimodal
+        T = next(iter(X.values())).shape[-1]
         S_shape = (len(X),*next(iter(X.values())).shape)
-        S_shape = (*S_shape[:-2],num_comp,B_shape)
-        XtX_shape = (*S_shape[:-2],B_shape,B_shape)
+        S_shape = (*S_shape[:-2],num_comp,T)
+        S = np.zeros(S_shape)
+        
+        XtX_shape = (*S_shape[:-2],T,T)
         XtX = np.zeros(XtX_shape)
         for m,key in enumerate(X):
             XtX[m] = np.swapaxes(X[key],-2,-1)@X[key]
+        # the sum is taken over modalities and subjects
+        XtX_sum = np.sum(XtX,axis=(0,1))
+        
     else:
-        B_shape = X.shape[-1]
         XtX = np.swapaxes(X,-2,-1)@X
-    Bp = np.random.uniform(size=(B_shape, num_comp))
-    Bn = np.random.uniform(size=(B_shape, num_comp))
+        XtX_sum = np.sum(XtX,axis=0)
+    
+    XtX_lambda2 = 2*XtX_sum + lambda2*np.eye(T)
+    XtX_minus = -2*XtX_sum
+    P = np.concatenate((XtX_lambda2,XtX_minus),axis=1)
+    P = cvxopt.matrix(np.concatenate((P,np.concatenate((XtX_minus,XtX_lambda2),axis=-1)),axis=-2))
+    G = cvxopt.matrix(-np.eye(2*T))
+    h = cvxopt.matrix(np.zeros(2*T))
 
+    if Bp_init is None and Bn_init is None:
+        Bp = np.random.uniform(size=(T, num_comp))
+        Bn = np.random.uniform(size=(T, num_comp))
+    else:
+        Bp = Bp_init 
+        Bn = Bn_init
+        
     for epoch in tqdm(range(max_iter)):
-        Bp,Bn,S = larsqp.larsqp(X,Bp=Bp,Bn=Bn,lambda1=lambda1,lambda2=lambda2,XtX=XtX)
+        initvals = cvxopt.matrix(np.concatenate((Bp,Bn),axis=0))
+
+        if type(X) is dict:
+            for m,key in enumerate(X):
+                U,Sigma,Vt = np.linalg.svd(XtX[m] @ (Bp-Bn),full_matrices=False)
+                S[m] = np.swapaxes(U@Vt,-2, -1)
+            SXtX = 2*np.sum(S@XtX,axis=(0,1))
+        else:
+            U,Sigma,Vt = np.linalg.svd(XtX@(Bp-Bn),full_matrices=False)
+            S = np.swapaxes(U@Vt,-2, -1)
+            SXtX = 2*np.sum(S@XtX,axis=0)
+
+        Q = cvxopt.matrix(-np.concatenate((SXtX,-SXtX),axis=1)+lambda1) #vektor, 2T lang
+        for k in range(num_comp):
+            sol = np.array(cvxopt.solvers.qp(P,Q[k,:].T,G,h,initvals=initvals[:,k])['x']).reshape(2*T,)
+            #sol = quadprog.solve_qp(P,-Q[k],-G,h)[0]
+            Bp[:,k] = sol[:T] #første halvdel
+            Bn[:,k] = sol[T:] #anden halvdel
+
         if type(X) is dict:
             loss = 0
             for m,key in enumerate(X):
@@ -35,5 +71,31 @@ def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10):
                 break
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
-    best_loss = min(all_loss)
-    return all_loss, best_loss
+    return all_loss,Bp,Bn,S
+def larsqp_eval(X,Xtest,Bp,Bn,num_comp):
+
+    if type(X) is dict: #if input data is multimodal
+        T = next(iter(X.values())).shape[-1]
+        S_shape = (len(X),*next(iter(X.values())).shape)
+        S_shape = (*S_shape[:-2],num_comp,T)
+        S = np.zeros(S_shape)
+        
+        XtX_shape = (*S_shape[:-2],T,T)
+        XtX = np.zeros(XtX_shape)
+        for m,key in enumerate(X):
+            XtX[m] = np.swapaxes(X[key],-2,-1)@X[key]
+            U,Sigma,Vt = np.linalg.svd(XtX[m] @ (Bp-Bn),full_matrices=False)
+            S[m] = np.swapaxes(U@Vt,-2, -1)
+        
+    else:
+        XtX = np.swapaxes(X,-2,-1)@X
+        U,Sigma,Vt = np.linalg.svd(XtX@(Bp-Bn),full_matrices=False)
+        S = np.swapaxes(U@Vt,-2, -1)
+
+    if type(X) is dict:
+        loss = 0
+        for m,key in enumerate(X):
+            loss += np.linalg.norm(X[key]-Xtest[key]@(Bp-Bn)@S[m])**2
+    else:
+        loss = np.linalg.norm(X-Xtest@(Bp-Bn)@S)**2
+    return loss

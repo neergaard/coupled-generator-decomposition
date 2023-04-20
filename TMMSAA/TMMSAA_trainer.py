@@ -26,15 +26,18 @@ def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=1
         #if epoch > 100:
         #    if all_loss[-5] - loss < 0:
         #        break
-        if epoch>100:
-            if all_loss[-5] - loss < tol:
-                break
+        #if epoch>100:
+        #    if all_loss[-100] - loss < tol:
+        #        break
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         lrs.append(optimizer.param_groups[0]["lr"])
-        if scheduler is not None:
-            scheduler.step()
+        if epoch>100:
+            if scheduler is not None:
+                scheduler.step(loss)
+                if optimizer.param_groups[0]["lr"]<0.001:
+                    break
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
     best_loss = min(all_loss)
