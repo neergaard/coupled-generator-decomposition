@@ -20,8 +20,8 @@ def run_model(K):
 
     # Model: group PCA
     _,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)
-    Bp = torch.nn.functional.relu(V_group_pca)
-    Bn = torch.nn.functional.relu(-V_group_pca)
+    Bp = np.array(torch.nn.functional.relu(V_group_pca))
+    Bn = np.array(torch.nn.functional.relu(-V_group_pca))
 
     for modeltype in modeltypes:
         for outer in range(num_iter_outer):
@@ -47,4 +47,4 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         run_model(K=int(sys.argv[1]))
     else:
-        run_model(M=2,K=5)
+        run_model(K=5)

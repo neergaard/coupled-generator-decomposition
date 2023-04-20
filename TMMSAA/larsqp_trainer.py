@@ -1,7 +1,6 @@
 # optimization loop
 from tqdm import tqdm
 import numpy as np
-from TMMSAA import larsqp
 import cvxopt
 
 def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None):
@@ -16,13 +15,21 @@ def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=
         XtX_shape = (*S_shape[:-2],T,T)
         XtX = np.zeros(XtX_shape)
         for m,key in enumerate(X):
+            X[key] = np.array(X[key])
             XtX[m] = np.swapaxes(X[key],-2,-1)@X[key]
         # the sum is taken over modalities and subjects
         XtX_sum = np.sum(XtX,axis=(0,1))
         
-    else:
+    elif np.array(X).ndim==3:
+        T = X.shape[-1]
+        X = np.array(X)
         XtX = np.swapaxes(X,-2,-1)@X
         XtX_sum = np.sum(XtX,axis=0)
+    elif np.array(X).ndim==2:
+        T = X.shape[-1]
+        X = np.array(X)
+        XtX = X.T@X
+        XtX_sum = XtX
     
     XtX_lambda2 = 2*XtX_sum + lambda2*np.eye(T)
     XtX_minus = -2*XtX_sum
@@ -46,10 +53,14 @@ def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=
                 U,Sigma,Vt = np.linalg.svd(XtX[m] @ (Bp-Bn),full_matrices=False)
                 S[m] = np.swapaxes(U@Vt,-2, -1)
             SXtX = 2*np.sum(S@XtX,axis=(0,1))
-        else:
+        elif np.array(X).ndim==3:
             U,Sigma,Vt = np.linalg.svd(XtX@(Bp-Bn),full_matrices=False)
             S = np.swapaxes(U@Vt,-2, -1)
             SXtX = 2*np.sum(S@XtX,axis=0)
+        elif np.array(X).ndim==2:
+            U,Sigma,Vt = np.linalg.svd(XtX@(Bp-Bn),full_matrices=False)
+            S = np.swapaxes(U@Vt,-2, -1)
+            SXtX = 2*S@XtX
 
         Q = cvxopt.matrix(-np.concatenate((SXtX,-SXtX),axis=1)+lambda1) #vektor, 2T lang
         for k in range(num_comp):
@@ -66,7 +77,7 @@ def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=
             loss = np.linalg.norm(X-X@(Bp-Bn)@S)**2
         all_loss.append(loss.item())
 
-        if epoch>100:
+        if epoch>5:
             if all_loss[-5] - loss < tol:
                 break
 
