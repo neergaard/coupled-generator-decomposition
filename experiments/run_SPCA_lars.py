@@ -23,9 +23,10 @@ def run_model(K):
     Bp = np.array(torch.nn.functional.relu(V_group_pca))
     Bn = np.array(torch.nn.functional.relu(-V_group_pca))
 
-    for modeltype in modeltypes:
-        for outer in range(num_iter_outer):
-            for inner in range(num_iter_inner):
+    
+    for outer in range(num_iter_outer):
+        for inner in range(num_iter_inner):
+            for modeltype in modeltypes:
                 all_train_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 all_test1_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 all_test2_loss = np.zeros((len(l2_vals),len(l1_vals)))
