@@ -11,7 +11,7 @@
 # -- commands you want to execute -- 
 module load python3/3.10.7
 module load numpy/1.23.3-python-3.10.7-openblas-0.3.21
-# python3 -m pip install --user tqdm torch
+python3 -m pip install --user tqdm torch
 cd ..
-# pip install .
+pip install .
 python3 experiments/run_SPCA.py 2 10
