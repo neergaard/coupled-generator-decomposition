@@ -4,7 +4,7 @@
 #BSUB -R "rusage[mem=1GB]"
 #BSUB -o real_fit_job_out_%J.txt
 #BSUB -e real_fit_job_err_%J.txt
-#BSUB -W 48:00 
+#BSUB -W 23:00 
 #BSUB -n 8
 #BSUB -R "span[hosts=1]"
 
@@ -14,5 +14,4 @@ module load numpy/1.23.3-python-3.10.7-openblas-0.3.21
 # python3 -m pip install --user tqdm torch
 cd ..
 # pip install .
-
 python3 experiments/run_SPCA.py 2 10
