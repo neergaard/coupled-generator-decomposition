@@ -1,76 +1,54 @@
 import sys
+import os.path
 import torch
 import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer
+from load_data import load_data
 import matplotlib.pyplot as plt
+#from ica import ica1
+#from TMMSAA.TMMSAA import SSE
+modeltypes = ['group_spca','mm_spca','mmms_spca']
+num_modalities = [1,2,2]
 
-modeltypes=['group_spca','mm_spca','mmms_spca']
-num_modalities=[1,2,2]
-    
-modality_names = ["EEG", "MEG"]
+Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2 = load_data()
 
-X_train_mmmsmc = {} # split by modality, subject, condition
-X_train_mmms = {} # split by modality, subject
-X_train_mm = {} # split by modality
-for m in modality_names:
-    X_train_mmmsmc[m] = torch.load("data/concatenatedData/X_" + m + "_FT_frob.pt")
-    X_train_mmms[m] = torch.cat((X_train_mmmsmc[m][:, 0], X_train_mmmsmc[m][:, 1],X_train_mmmsmc[m][:, 2],),dim=-1)
-    X_train_mm[m] = torch.reshape(X_train_mmms[m],(16*X_train_mmms[m].shape[-2],540))
-
-X_train_group_spca = torch.cat((X_train_mm['EEG'],X_train_mm['MEG']),dim=-2)
-
-X = {'group_spca':X_train_group_spca,'mm_spca':X_train_mm,'mmms_spca':X_train_mmms}
-
-times = torch.load("data/MEEGtimes.pt")
-dims = {'group_spca':X_train_group_spca.shape,'mm_spca':X_train_mm["EEG"].shape,'mmms_spca':X_train_mmms["EEG"].shape}
+dims = {'group_spca':Xtrain['group_spca'].shape,'mm_spca':Xtrain['mm_spca']["EEG"].shape,'mmms_spca':Xtrain['mmms_spca']["EEG"].shape}
 #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
-l1_vals = torch.logspace(-5,2,8)
-l1_vals = l1_vals[0:4]
-l2 = 0.0
-K = 5
+l1_vals = torch.logspace(-5,-2,4)
+#l2_vals = torch.logspace(-5,2,8)
+lambda2 = 0.01
 
-num_iter_outer = 1
-num_iter_inner = 10
+num_iter_outer = 5
+num_iter_inner = 5
 
-# Group pca initialization
-_,_,V = torch.pca_lowrank(X['group_spca'],q=K)
-init0 = {'Bp':torch.nn.functional.relu(V),'Bn':torch.nn.functional.relu(-V)}
+K=5
+modeltype = modeltypes[2]
 
-modeltype_best_models = []
-best_models = []
-best_losses = np.zeros((3,num_iter_outer))
-for m,modeltype in enumerate(modeltypes):
-    if m==0 or m==1:
-        continue
-    for outer in range(num_iter_outer):
-        best_loss = 10000000
-        for inner in range(num_iter_inner):
-            fitloss = np.zeros(len(l1_vals))
-            loss_l1 = []
-            for l1,lambda1 in enumerate(l1_vals):
-                if l1==0:
-                    model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init0)
-                else:
-                    model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_modalities=num_modalities[m],num_comp=K,model='SPCA',lambda1=lambda1,lambda2=l2,init=init)
-                optimizer = torch.optim.SGD(model.parameters(), lr=1)
-                scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=1, steps_per_epoch=10, epochs=1000,div_factor=10000,pct_start=0.3)
-                loss = TMMSAA_trainer.Optimizationloop(model=model,X=X[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=10000,tol=1e-3)
-                C,S,Bp,Bn = model.get_model_params(X=X[modeltype])
-                init={'Bp':Bp,'Bn':Bn}
-                fitloss[l1] = model.eval_model(Xtrain=X[modeltype],Xtraintilde=X[modeltype],Xtest=X[modeltype])
-                loss_l1.append(loss)
+# Model: group PCA
+#_,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)
+#init0 = {'Bp':torch.nn.functional.relu(V_group_pca),'Bn':torch.nn.functional.relu(-V_group_pca)}
 
-                print('Done with '+modeltype+', outer='+str(outer)+', inner='+str(inner)+', l1_idx='+str(l1))
-                
-            if loss[-1]<best_loss:
-                best_loss = loss[-1]
-                best_model = model
+for outer in range(num_iter_outer):
+    losses = np.zeros((num_iter_inner,4))
+    for inner in range(num_iter_inner):
+        for l1,lambda1 in enumerate(l1_vals):
+            if l1==0:
+                model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
+            else:
+                model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
+            
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,threshold=1e-4,threshold_mode='abs',min_lr=0.0001,patience=100)
+            loss,best_loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=30000,tol=1e-4)
+            C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
+            init={'Bp':Bp,'Bn':Bn}
+
+        losses[inner,0]=best_loss
+        losses[inner,1]=model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
+        losses[inner,2]=model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
+        losses[inner,3]=model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
         
-        best_models.append(best_model)
-        best_losses[m,outer] = best_loss
-    best_of_best = np.argmin(best_losses[m])
-    modeltype_best_models.append(best_models[best_of_best])
-    
-# plotting
-h=7
+        np.savetxt("data/SPCA_results_selectedregu/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
+            
+        h=7

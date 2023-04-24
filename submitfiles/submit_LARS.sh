@@ -4,7 +4,7 @@
 #BSUB -R "rusage[mem=1GB]"
 #BSUB -o real_fit_job_out_%J.txt
 #BSUB -e real_fit_job_err_%J.txt
-#BSUB -W 22:00 
+#BSUB -W 48:00 
 #BSUB -n 2
 #BSUB -R "span[hosts=1]"
 

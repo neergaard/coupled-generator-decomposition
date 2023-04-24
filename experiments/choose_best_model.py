@@ -13,9 +13,10 @@ num_iter_inner = 10
 
 num_comps = np.arange(2,31)
 
-
+plt.figure()
+linestyles = ['-','--']
 for inf_type in range(2):
-    plt.figure()
+    
     if inf_type==0:
         folder = 'SPCA_results'
     elif inf_type==1:
@@ -45,7 +46,7 @@ for inf_type in range(2):
                 order_l1l2[k] = np.nan
 
             
-        plt.plot(num_comps,best_loss)
-        plt.legend(modeltypes)
+        plt.plot(num_comps,best_loss,linestyle=linestyles[inf_type])
+plt.legend(modeltypes)
 
-    h = 7
+h = 7
