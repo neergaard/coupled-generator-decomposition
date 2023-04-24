@@ -6,7 +6,7 @@ from TMMSAA import TMMSAA, TMMSAA_trainer
 from load_data import load_data
 #from ica import ica1
 #from TMMSAA.TMMSAA import SSE
-torch.set_num_threads(32)
+torch.set_num_threads(168)
 def run_model(M,K):
     if M==0:
         modeltype='group_spca'
@@ -27,7 +27,7 @@ def run_model(M,K):
     l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
 
     num_iter_outer = 5
-    num_iter_inner = 10
+    num_iter_inner = 5
 
     # Model: group PCA
     _,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)

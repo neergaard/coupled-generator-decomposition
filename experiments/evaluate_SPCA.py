@@ -23,14 +23,14 @@ for m,modeltype in enumerate(modeltypes):
             allinner = np.zeros((num_iter_inner,len(l1_vals),len(l2_vals)))
             for inner in range(num_iter_inner):
                 try:
-                    allinner[inner]=np.genfromtxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
+                    allinner[inner]=np.genfromtxt("data/SPCA_results/test1_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',delimiter=',')
                 except:
                     allinner[inner] = np.nan
             loss[outer] = np.nanmin(allinner,axis=0)
         if m==2 and K==5:
             h=7
 
-        ax[m,k].imshow(np.nanmean(loss,axis=0),vmin=0,vmax=100)
+        ax[m,k].imshow(np.nanmean(loss,axis=0),vmin=15,vmax=16)
         ax[m,k].set_title(modeltype+', K='+str(K))
         if m==2:
             ax[m,k].set_xticks(ticks=np.arange(len(l1_vals)),labels=l1_vals,rotation = 45)

@@ -6,4 +6,3 @@ do
     bsub < submit_LARS.sh
 
 done
-

@@ -5,7 +5,7 @@ import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer,larsqp,larsqp_trainer
 from load_data import load_data
 
-torch.set_num_threads(16)
+torch.set_num_threads(168)
 
 def run_model(K):
     modeltypes = ['group_spca','mm_spca','mmms_spca']
@@ -18,20 +18,23 @@ def run_model(K):
     num_iter_outer = 5
     num_iter_inner = 10
 
-    # Model: group PCA
-    _,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)
-    Bp = np.array(torch.nn.functional.relu(V_group_pca))
-    Bn = np.array(torch.nn.functional.relu(-V_group_pca))
+
 
     
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
             for modeltype in modeltypes:
+                if os.path.isfile("data/SPCA_QP_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
+                    continue
                 all_train_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 all_test1_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 all_test2_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 all_test12_loss = np.zeros((len(l2_vals),len(l1_vals)))
                 for l2,lambda2 in enumerate(l2_vals):
+                    # group PCA as initialization
+                    _,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)
+                    Bp = np.array(torch.nn.functional.relu(V_group_pca))
+                    Bn = np.array(torch.nn.functional.relu(-V_group_pca))
                     for l1,lambda1 in enumerate(l1_vals):
                         loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=lambda1,lambda2=lambda2,max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
                         
