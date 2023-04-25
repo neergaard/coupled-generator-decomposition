@@ -113,7 +113,7 @@ def larsqp_eval(X,Xtest,Bp,Bn,num_comp):
     if type(X) is dict:
         loss = 0
         for m,key in enumerate(X):
-            loss += np.linalg.norm(X[key]-np.array(Xtest[key])@(Bp-Bn)@S[m])**2
+            loss += np.sum(np.linalg.norm(Xtest[key]-np.array(X[key])@(Bp-Bn)@S[m],axis=(-2,-1))**2)
     else:
-        loss = np.linalg.norm(X-Xtest@(Bp-Bn)@S)**2
+        loss = np.sum(np.linalg.norm(Xtest-X@(Bp-Bn)@S,axis=(-2,-1))**2)
     return loss
