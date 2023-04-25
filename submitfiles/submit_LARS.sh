@@ -1,7 +1,7 @@
 #!/bin/sh
 #BSUB -J real_fit_job
 #BSUB -q computebigbigmem
-#BSUB -R "rusage[mem=1GB]"
+#BSUB -R "rusage[mem=4GB]"
 #BSUB -o real_fit_job_out_%J.txt
 #BSUB -e real_fit_job_err_%J.txt
 #BSUB -W 48:00 
