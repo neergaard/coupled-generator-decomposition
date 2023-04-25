@@ -49,6 +49,8 @@ for outer in range(num_iter_outer):
         losses[inner,2]=model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
         losses[inner,3]=model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
         
-        np.savetxt("data/SPCA_results_selectedregu/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
+        np.savetxt("data/SPCA_results_selectedregu/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',losses,delimiter=',')
+        np.savetxt("data/SPCA_results_selectedregu/C_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(C),delimiter=',')
+        np.savetxt("data/SPCA_results_selectedregu/S_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(S),delimiter=',')
             
         h=7
