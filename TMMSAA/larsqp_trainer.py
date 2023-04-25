@@ -2,6 +2,7 @@
 from tqdm import tqdm
 import numpy as np
 import cvxopt
+cvxopt.solvers.options['show_progress'] = False
 
 def Optimizationloop(X,num_comp,lambda1,lambda2,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None):
     

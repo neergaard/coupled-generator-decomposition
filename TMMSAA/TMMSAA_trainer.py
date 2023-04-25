@@ -36,7 +36,7 @@ def Optimizationloop(model, X, optimizer, scheduler=None,Xtilde=None, max_iter=1
         if epoch>100:
             if scheduler is not None:
                 scheduler.step(loss)
-                if optimizer.param_groups[0]["lr"]<0.01:
+                if optimizer.param_groups[0]["lr"]<0.001:
                     break
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
