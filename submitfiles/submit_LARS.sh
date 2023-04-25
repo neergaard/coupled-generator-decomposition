@@ -15,4 +15,4 @@ python3 -m pip install --user cvxopt
 python3 -m pip install --user tqdm torch
 cd ..
 pip install .
-python3 experiments/run_SPCA_lars.py 20
+python3 experiments/run_SPCA_QP_noregu.py 2 20
