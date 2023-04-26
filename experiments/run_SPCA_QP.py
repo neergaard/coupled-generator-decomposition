@@ -15,7 +15,7 @@ def run_model(M,K):
 
     l1_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
     l2_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
-    l2_vals = l2_vals[4:]
+    # l2_vals = l2_vals[4:]
     
     num_iter_outer = 5
     num_iter_inner = 10
