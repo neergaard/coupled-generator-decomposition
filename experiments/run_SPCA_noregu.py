@@ -25,8 +25,8 @@ def run_model(M,K):
 
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
-            if os.path.isfile("data/SPCA_noregu_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
-                continue
+            #if os.path.isfile("data/SPCA_noregu_results/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
+            #    continue
 
             losses = np.zeros(4)
             model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=0,lambda2=0,init=None)

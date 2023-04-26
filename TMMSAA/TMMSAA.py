@@ -103,8 +103,8 @@ class TMMSAA(torch.nn.Module):
     def eval_model(self, Xtrain,Xtraintilde,Xtest):
         with torch.no_grad():
             if self.model == 'AA' or self.model == 'DAA':
-                S_soft = self.softmaxS(self.S)
-                C_soft = self.softmaxC(self.C)
+                S = self.softmaxS(self.S)
+                C = self.softmaxC(self.C)
             elif self.model=='SPCA':
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
@@ -114,25 +114,15 @@ class TMMSAA(torch.nn.Module):
             if type(Xtest) is dict:
                 loss = 0
                 for m,key in enumerate(Xtest):
-                    if self.model == "AA":
-                        loss += self.SSE(Xtest[key], Xtraintilde[key],C_soft,S_soft)
-                    elif self.model == "DAA":
-                        #loss += self.forwardDAA(Xtest[key], Xtraintilde[key],C_soft,S_soft)
-                        loss += self.SSE(Xtest[key], Xtraintilde[key],C_soft,S_soft)
-                    elif self.model == 'SPCA':
+                    if self.model == 'SPCA':
                         U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
                         S = torch.transpose(U@Vt,-2,-1)
-                        loss += self.SSE(Xtest[key], Xtraintilde[key],C,S)
+                    loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@C@S)**2)
             else:
-                if self.model == "AA":
-                    loss = self.SSE(Xtest, Xtraintilde,C_soft,S_soft)
-                elif self.model == "DAA":
-                    #loss = self.forwardDAA(Xtest, Xtraintilde,C_soft,S_soft)
-                    loss = self.SSE(Xtest, Xtraintilde,C_soft,S_soft)
-                elif self.model == "SPCA":
+                if self.model == "SPCA":
                     U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain, -2, -1) @ Xtraintilde@C,full_matrices=False)
                     S = torch.transpose(U@Vt,-2,-1)
-                    loss = self.SSE(Xtest, Xtraintilde,C,S)
+                loss = torch.sum(torch.linalg.matrix_norm(Xtest-Xtraintilde@C@S)**2)
         return loss.item()
     
     def SSE(self,X,Xtilde,C,S,Xsqnorm=None):
@@ -146,7 +136,6 @@ class TMMSAA(torch.nn.Module):
             - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
             + torch.sum(XC*XC)
         )
-        # the last element was torch.sum(XCtXC@S*S) until we realized that S is orthogonal, i.e., SS.T = eye
 
         return SSE
     
