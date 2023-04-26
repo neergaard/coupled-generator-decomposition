@@ -5,7 +5,7 @@ import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer,larsqp,larsqp_trainer
 from load_data import load_data
 
-torch.set_num_threads(168)
+torch.set_num_threads(8)
 
 def run_model(M,K):
     modeltypes = ['group_spca','mm_spca','mmms_spca']
