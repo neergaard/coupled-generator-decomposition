@@ -18,7 +18,7 @@ def run_model(M,K):
     # l2_vals = l2_vals[4:]
     
     num_iter_outer = 5
-    num_iter_inner = 10
+    num_iter_inner = 50
 
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
