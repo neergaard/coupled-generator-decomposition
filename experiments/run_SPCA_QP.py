@@ -32,7 +32,7 @@ def run_model(M,K):
                 loss_curves = []
                 loss_curve_lengths = []
                 for l1,lambda1 in enumerate(l1_vals):
-                    loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=lambda1,lambda2=lambda2,max_iter=10000, tol=1e-6,Bp_init=None,Bn_init=None)
+                    loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=lambda1,lambda2=lambda2,max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bp)
                     all_train_loss[l2,l1] = loss_lars[-1]
                     all_test1_loss[l2,l1] = larsqp_trainer.larsqp_eval(X=Xtrain1[modeltype],Xtest=Xtest1[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
                     all_test2_loss[l2,l1] = larsqp_trainer.larsqp_eval(X=Xtrain2[modeltype],Xtest=Xtest2[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
