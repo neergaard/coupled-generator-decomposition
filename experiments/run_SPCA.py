@@ -4,9 +4,8 @@ import torch
 import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer
 from load_data import load_data
-#from ica import ica1
-#from TMMSAA.TMMSAA import SSE
-torch.set_num_threads(168)
+torch.set_num_threads(8)
+
 def run_model(M,K):
     if M==0:
         modeltype='group_spca'
@@ -27,11 +26,7 @@ def run_model(M,K):
     l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
 
     num_iter_outer = 5
-    num_iter_inner = 5
-
-    # Model: group PCA
-    _,_,V_group_pca = torch.pca_lowrank(Xtrain['group_spca'],q=K,niter=100)
-    init0 = {'Bp':torch.nn.functional.relu(V_group_pca),'Bn':torch.nn.functional.relu(-V_group_pca)}
+    num_iter_inner = 50
 
     for outer in range(num_iter_outer):
         for inner in range(num_iter_inner):
@@ -44,8 +39,8 @@ def run_model(M,K):
             all_test12_loss = np.zeros((len(l2_vals),len(l1_vals)))
             for l2,lambda2 in enumerate(l2_vals):
                 for l1,lambda1 in enumerate(l1_vals):
-                    if l1==0 or l1==1:
-                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
+                    if l1==0:
+                        model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
                     else:
                         model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
                     
