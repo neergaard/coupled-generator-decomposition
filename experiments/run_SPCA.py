@@ -64,4 +64,4 @@ if __name__=="__main__":
     if len(sys.argv)>1:
         run_model(M=int(sys.argv[1]),K=int(sys.argv[2]),outer=int(sys.argv[3]))
     else:
-        run_model(M=2,K=5)
+        run_model(M=2,K=5,outer=0)
