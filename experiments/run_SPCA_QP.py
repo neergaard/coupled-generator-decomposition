@@ -7,7 +7,7 @@ from load_data import load_data
 
 torch.set_num_threads(8)
 
-def run_model(M,K):
+def run_model(M,K,outer):
     modeltypes = ['group_spca','mm_spca','mmms_spca']
     modeltype = modeltypes[M]
     
