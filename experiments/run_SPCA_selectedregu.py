@@ -15,7 +15,7 @@ Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2 = load_data()
 dims = {'group_spca':Xtrain['group_spca'].shape,'mm_spca':Xtrain['mm_spca']["EEG"].shape,'mmms_spca':Xtrain['mmms_spca']["EEG"].shape}
 #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
-l1_vals = torch.logspace(-5,-2,4)
+l1_vals = torch.logspace(-5,-1,4)
 #l2_vals = torch.logspace(-5,2,8)
 lambda2 = 0.01
 
@@ -44,13 +44,14 @@ for outer in range(num_iter_outer):
             C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
             init={'Bp':Bp,'Bn':Bn}
 
-        losses[inner,0]=best_loss
-        losses[inner,1]=model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
-        losses[inner,2]=model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
-        losses[inner,3]=model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
+        np.savetxt('data/C_'+modeltype,C,delimiter=',')
+        np.savetxt('data/S_'+modeltype,S,delimiter=',')
+        # losses[inner,0]=best_loss
+        # losses[inner,1]=model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
+        # losses[inner,2]=model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
+        # losses[inner,3]=model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
         
-        np.savetxt("data/SPCA_results_selectedregu/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',losses,delimiter=',')
-        np.savetxt("data/SPCA_results_selectedregu/C_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(C),delimiter=',')
-        np.savetxt("data/SPCA_results_selectedregu/S_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(S),delimiter=',')
+        # np.savetxt("data/SPCA_results_selectedregu/loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',losses,delimiter=',')
+        # np.savetxt("data/SPCA_results_selectedregu/C_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(C),delimiter=',')
+        # np.savetxt("data/SPCA_results_selectedregu/S_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',np.array(S),delimiter=',')
             
-        h=7

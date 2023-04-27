@@ -2,8 +2,9 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
-modeltypes = ['group_pca','group_ica','group_spca','mm_spca','mmms_spca','group_spca','mm_spca','mmms_spca']
+# modeltypes = ['group_pca','group_ica','group_spca','mm_spca','mmms_spca','group_spca','mm_spca','mmms_spca']
 # modeltypes = ['group_pca','group_ica','group_spca','mm_spca','mmms_spca']
+modeltypes = ['group_spca','mm_spca','mmms_spca']
 modality_names = ["EEG", "MEG"]
 
 num_iter_outer = 5
@@ -54,13 +55,14 @@ for m,modeltype in enumerate(modeltypes):
             std_train_loss[m,k] = np.nanstd(np.nanmin(train_loss,axis=1))
             std_test_loss[m,k] = np.nanstd(best_test_inner)
     
-    if m>1:
-        ax1.errorbar(num_comps,mean_train_loss[m],std_train_loss[m])
-        ax2.errorbar(num_comps,mean_test_loss[m],std_test_loss[m])
-    elif m<2:
-        ax1.plot(num_comps,mean_train_loss[m])
-        ax2.plot(num_comps,mean_test_loss[m])
-ax2.legend(['Group PCA','Group ICA','Group sparse PCA','Multimodal sparse PCA','Multimodal, multisubject sparse PCA'],loc='lower left',frameon=False)
+    # if m>1:
+    ax1.errorbar(num_comps,mean_train_loss[m],std_train_loss[m])
+    ax2.errorbar(num_comps,mean_test_loss[m],std_test_loss[m])
+    # elif m<2:
+    #     ax1.plot(num_comps,mean_train_loss[m])
+    #     ax2.plot(num_comps,mean_test_loss[m])
+# ax2.legend(['Group PCA','Group ICA','Group sparse PCA','Multimodal sparse PCA','Multimodal, multisubject sparse PCA'],loc='lower left',frameon=False)
+ax2.legend(['Group PCA','Multimodal PCA','Multimodal, multisubject PCA'],loc='lower left',frameon=False)
 # ax1.legend(modeltypes)
 ax1.set_ylim(0,60)
 ax2.set_ylim(0,60)
@@ -71,4 +73,6 @@ ax2.set_title('Test loss')
 ax1.set_xlabel('Model order (K)')
 ax2.set_xlabel('Model order (K)')
 ax1.set_ylabel('Sum of squared errors (SSE)')
+ax2.set_ylabel('Sum of squared errors (SSE)')
+plt.savefig('reports/train_test.png',dpi=600,bbox_inches='tight')
 h = 7
