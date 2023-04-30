@@ -46,15 +46,15 @@ def run_model(M,K,outer):
                 loss,best_loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=30000,tol=1e-4)
                 C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
                 init={'Bp':Bp,'Bn':Bn}
-                loss_curves.extend(loss)
-                loss_curve_lengths.append(len(loss))
+                #loss_curves.extend(loss)
+                #loss_curve_lengths.append(len(loss))
 
                 all_test1_loss[l2,l1] = model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
                 all_test2_loss[l2,l1] = model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
                 all_test12_loss[l2,l1] = model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
                 all_train_loss[l2,l1] = best_loss
-            np.savetxt("data/SPCA_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
-            np.savetxt("data/SPCA_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
+            #np.savetxt("data/SPCA_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
+            #np.savetxt("data/SPCA_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
         np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
         np.savetxt("data/SPCA_results/test1_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test1_loss,delimiter=',')
         np.savetxt("data/SPCA_results/test2_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test2_loss,delimiter=',')
