@@ -22,8 +22,8 @@ def run_model(M,K,outer):
     dims = {'group_spca':Xtrain['group_spca'].shape,'mm_spca':Xtrain['mm_spca']["EEG"].shape,'mmms_spca':Xtrain['mmms_spca']["EEG"].shape}
     #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
 
-    l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
-    l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,2,8)))
+    l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,1,19)))
+    l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,1,7)))
     # l2_vals = l2_vals[4:]
 
     num_iter_outer = 5

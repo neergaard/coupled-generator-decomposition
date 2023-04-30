@@ -13,8 +13,8 @@ def run_model(M,K,outer):
     
     Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2 = load_data()
 
-    l1_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
-    l2_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,2,8))))
+    l1_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,1,19))))
+    l2_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,1,7))))
     # l2_vals = l2_vals[4:]
     
     num_iter_outer = 5
