@@ -29,9 +29,11 @@ def run_model(M,K,outer,oneinner=0):
     if oneinner==1:
         num_iter_inner=2
     else:
-        num_iter_inner = 50
+        num_iter_inner = 15
 
     for inner in range(num_iter_inner):
+        if os.path.isfile("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
+            continue
 
         all_train_loss = np.zeros((len(l2_vals),len(l1_vals)))
         all_test1_loss = np.zeros((len(l2_vals),len(l1_vals)))
@@ -55,8 +57,9 @@ def run_model(M,K,outer,oneinner=0):
                 all_test2_loss[l2,l1] = model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
                 all_test12_loss[l2,l1] = model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
                 all_train_loss[l2,l1] = best_loss
-            np.savetxt("data/SPCA_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
-            np.savetxt("data/SPCA_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
+            if oneinner==1:
+                np.savetxt("data/SPCA_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
+                np.savetxt("data/SPCA_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
         if oneinner!=1:
             np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
             np.savetxt("data/SPCA_results/test1_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test1_loss,delimiter=',')

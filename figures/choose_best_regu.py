@@ -74,7 +74,7 @@ for inf_type in range(2):
                 axs2[0].set_ylabel('Test SSE')
                 minval = np.min(order_loss)
                 minloc = np.where(order_loss==minval)[1]
-                axs2[0].scatter(l1_vals[minloc],minval,s=80,facecolors='none',edgecolors='red')
+                axs2[0].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
             elif m==2:
                 for l2,_ in enumerate(l2_vals_plot):
                     axs2[1].semilogx(np.array(l1_vals_plot),order_loss[l2])
@@ -84,7 +84,7 @@ for inf_type in range(2):
                 axs2[1].set_ylabel('Test SSE')
                 minval = np.min(order_loss)
                 minloc = np.where(order_loss==minval)[1]
-                axs2[1].scatter(l1_vals[minloc],minval,s=80,facecolors='none',edgecolors='red')
+                axs2[1].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
             
         axs[inf_type,m].legend(np.array(l2_vals))
         axs[inf_type,m].set_title(modeltype)
