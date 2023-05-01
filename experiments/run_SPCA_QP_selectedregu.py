@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from TMMSAA import TMMSAA, TMMSAA_trainer
+from TMMSAA import TMMSAA, TMMSAA_trainer, larsqp_trainer
 from load_data import load_data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -39,7 +39,10 @@ lambda2 = torch.tensor(1)
 for outer in range(num_iter_outer):
     losses = np.zeros((num_iter_inner,4))
     for inner in range(num_iter_inner):
+        Bp = None # random initialization, then annealing
+        Bn = None
         for l1,lambda1 in enumerate(l1_vals):
+            ########## SPCA
             if l1==0:
                 model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=M,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=None)
             else:
@@ -50,6 +53,10 @@ for outer in range(num_iter_outer):
             loss,best_loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=30000,tol=1e-4)
             C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
             init={'Bp':Bp,'Bn':Bn}
+
+
+            ################# QP
+            loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=np.array(lambda1),lambda2=np.array(lambda2),max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
 
         np.savetxt('data/C_'+modeltype,C,delimiter=',')
         if modeltype=='mmms_spca':

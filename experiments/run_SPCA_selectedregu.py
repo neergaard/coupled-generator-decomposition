@@ -4,6 +4,7 @@ from TMMSAA import TMMSAA, TMMSAA_trainer
 from load_data import load_data
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+torch.set_num_threads(8)
 
 modeltypes = ['group_spca','mm_spca','mmms_spca']
 num_modalities = [1,2,2]
