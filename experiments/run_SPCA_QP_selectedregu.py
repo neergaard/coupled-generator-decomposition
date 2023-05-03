@@ -59,7 +59,7 @@ def run_model(M1,M2):
                     inf_type = 'QP'
                     loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=np.array(lambda1),lambda2=np.array(lambda2),max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
                     C = Bp-Bn
-            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'C_'+modeltype+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner)+'.txt',C,delimiter=',')
+            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'C_'+modeltype+'_rep_'+str(outer)+'_'+str(inner)+'.txt',C,delimiter=',')
             if modeltype=='mmms_spca':
                 for m in range(M):
                     for s in range(16):
