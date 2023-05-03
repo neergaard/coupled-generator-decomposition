@@ -61,18 +61,18 @@ def run_model(M1,M2):
                     inf_type = 'QP'
                     loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=np.array(lambda1),lambda2=np.array(lambda2),max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
                     C = Bp-Bn
-            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'C_'+modeltype+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner),C,delimiter=',')
+            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'C_'+modeltype+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner)+'.txt',C,delimiter=',')
             if modeltype=='mmms_spca':
                 for m in range(M):
                     for s in range(16):
-                        np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'S_'+modeltype+'_'+str(m)+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner),S[m,s],delimiter=',')
+                        np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'S_'+modeltype+'_'+str(m)+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner)+'.txt',S[m,s],delimiter=',')
             else:
-                np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'S_'+modeltype+'_rep'+str(outer)+'_'+str(inner),S,delimiter=',')
+                np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'S_'+modeltype+'_rep'+str(outer)+'_'+str(inner)+'.txt',S,delimiter=',')
         losses[inner,0]=best_loss
         losses[inner,1]=model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
         losses[inner,2]=model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
         losses[inner,3]=model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
-        np.savetxt("data/SPCA_results_selectedregu/'+inf_type+'loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+'.txt',losses,delimiter=',')
+        np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'loss_'+modeltype+'_K='+str(K)+'_rep_'+str(outer)+'.txt',losses,delimiter=',')
             
 
 if __name__=="__main__":
