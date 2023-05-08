@@ -12,15 +12,15 @@ l1_vals_plot = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,0,16))))
 l2_vals_plot = np.array(torch.hstack((torch.tensor(0),torch.logspace(-4,0,5))))
 
 num_iter_outer = 5
-num_iter_inner = 50
+num_iter_inner = 15
 
 num_comps = np.arange(2,31)
 
 linestyles = ['-','--']
 
 K=5
-fig, axs = plt.subplots(2,3, figsize=(12, 4))
-fig2, axs2 = plt.subplots(1,2, figsize=(10, 3))
+fig, axs = plt.subplots(2,1, figsize=(5, 6),layout='constrained')
+fig2, axs2 = plt.subplots(2,1, figsize=(5, 6),layout='constrained')
 for inf_type in range(2):
     
     if inf_type==0:
@@ -52,26 +52,42 @@ for inf_type in range(2):
             order_l1l2 = np.nan
 
         # axs[inf_type,m].imshow(order_loss[:-1,:-1],vmin=35.83,vmax=35.85)
-        for l2,_ in enumerate(l2_vals_plot):
-            axs[inf_type,m].semilogx(np.array(l1_vals_plot),order_loss[l2])
-        if m==0:
-            axs[inf_type,m].set_ylim((35.8,35.95))
-        elif m==1:
-            axs[inf_type,m].set_ylim((34.95,35.1))
-        elif m==2:
-            axs[inf_type,m].set_ylim((29.7,32))
+        
         if inf_type==0:
-            axs[inf_type,m].set_ylabel('torch SSE')
-        elif inf_type==1:
-            axs[inf_type,m].set_ylabel('QP SSE')
             if m==0:
+                axs[0].set_ylabel('QP SSE')
+                for l2,_ in enumerate(l2_vals_plot):
+                    axs[0].semilogx(np.array(l1_vals_plot),order_loss[l2])
+                axs[0].set_ylim((35.8,35.95))
+                axs[0].legend(np.array(l2_vals_plot),title=r'$\lambda_2$ regu.',loc='lower right')
+                axs[0].set_title('Group sparse PCA, K=5')
+                axs[0].set_xlabel(r'$\lambda_1$ regularization')
+                axs[0].set_ylabel('Test SSE')
+                axs[0].set_yticks([35.80,35.85,35.90,35.95])
+                minval = np.min(order_loss)
+                minloc = np.where(order_loss==minval)[1]
+                axs[0].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
+            elif m==2:
+                for l2,_ in enumerate(l2_vals_plot):
+                    axs[1].semilogx(np.array(l1_vals_plot),order_loss[l2])
+                axs[1].set_ylim((29.7,32))
+                axs[1].set_title('Multimodal, multisubject sparse PCA, K=5')
+                axs[1].set_xlabel(r'$\lambda_1$ regularization')
+                axs[1].set_ylabel('Test SSE')
+                minval = np.min(order_loss)
+                minloc = np.where(order_loss==minval)[1]
+                axs[1].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
+        elif inf_type==1:
+            if m==0:
+                axs2[0].set_ylabel('QP SSE')
                 for l2,_ in enumerate(l2_vals_plot):
                     axs2[0].semilogx(np.array(l1_vals_plot),order_loss[l2])
                 axs2[0].set_ylim((35.8,35.95))
                 axs2[0].legend(np.array(l2_vals_plot),title=r'$\lambda_2$ regu.',loc='lower right')
-                axs2[0].set_title('Group sparse PCA')
+                axs2[0].set_title('Group sparse PCA, K=5')
                 axs2[0].set_xlabel(r'$\lambda_1$ regularization')
                 axs2[0].set_ylabel('Test SSE')
+                axs2[0].set_yticks([35.80,35.85,35.90,35.95])
                 minval = np.min(order_loss)
                 minloc = np.where(order_loss==minval)[1]
                 axs2[0].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
@@ -79,17 +95,15 @@ for inf_type in range(2):
                 for l2,_ in enumerate(l2_vals_plot):
                     axs2[1].semilogx(np.array(l1_vals_plot),order_loss[l2])
                 axs2[1].set_ylim((29.7,32))
-                axs2[1].set_title('Multimodal, multisubject sparse PCA')
+                axs2[1].set_title('Multimodal, multisubject sparse PCA, K=5')
                 axs2[1].set_xlabel(r'$\lambda_1$ regularization')
                 axs2[1].set_ylabel('Test SSE')
                 minval = np.min(order_loss)
                 minloc = np.where(order_loss==minval)[1]
                 axs2[1].scatter(l1_vals_plot[minloc],minval,s=80,facecolors='none',edgecolors='red')
             
-        axs[inf_type,m].legend(np.array(l2_vals))
-        axs[inf_type,m].set_title(modeltype)
-        axs[inf_type,m].set_xlabel('l1 regularization')
         
 
-fig2.savefig('reports/regularization_fig.png',dpi=600,bbox_inches='tight')
+fig.savefig('reports/regularization_fig_torch.png',dpi=600,bbox_inches='tight')
+fig2.savefig('reports/regularization_fig_QP.png',dpi=600,bbox_inches='tight')
 h = 7

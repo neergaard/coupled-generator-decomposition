@@ -1,6 +1,9 @@
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+font = {'size'   : 10}
+
+plt.rc('font', **font)
 
 # modeltypes = ['group_pca','group_ica','group_spca','mm_spca','mmms_spca','group_spca','mm_spca','mmms_spca']
 # modeltypes = ['group_pca','group_ica','group_spca','mm_spca','mmms_spca']
@@ -17,7 +20,10 @@ mean_test_loss = np.zeros((len(modeltypes),len(num_comps)))
 std_train_loss = np.zeros((len(modeltypes),len(num_comps)))
 std_test_loss = np.zeros((len(modeltypes),len(num_comps)))
 
-fig, (ax1, ax2) = plt.subplots(1,2, sharex=True, figsize=(12, 4))
+colors = ['b','r','g']
+
+# fig, (ax1, ax2) = plt.subplots(1,2, sharex=True, figsize=(12, 4))
+plt.figure(figsize=(6,4))
 for m,modeltype in enumerate(modeltypes):
     for k,K in enumerate(num_comps):
     
@@ -55,24 +61,28 @@ for m,modeltype in enumerate(modeltypes):
             std_train_loss[m,k] = np.nanstd(np.nanmin(train_loss,axis=1))
             std_test_loss[m,k] = np.nanstd(best_test_inner)
     
-    # if m>1:
-    ax1.errorbar(num_comps,mean_train_loss[m],std_train_loss[m])
-    ax2.errorbar(num_comps,mean_test_loss[m],std_test_loss[m])
-    # elif m<2:
-    #     ax1.plot(num_comps,mean_train_loss[m])
-    #     ax2.plot(num_comps,mean_test_loss[m])
+    
+    plt.errorbar(num_comps,mean_train_loss[m],std_train_loss[m],color=colors[m],linestyle='-')
+    plt.errorbar(num_comps,mean_test_loss[m],std_test_loss[m],color=colors[m],linestyle='--')
+
+plt.legend(['Group SPCA train','Group SPCA test','Multimodal SPCA train','Multimodal SPCA test',
+            'Multimodal, multisubject SPCA train','Multimodal, multisubject SPCA test'],loc='upper right',frameon=True)
+plt.ylabel('Sum of squared errors (SSE)')
+plt.xlabel('Model order (K)')
+plt.xticks(np.arange(2,21,2))
+plt.ylim(0,60)
 # ax2.legend(['Group PCA','Group ICA','Group sparse PCA','Multimodal sparse PCA','Multimodal, multisubject sparse PCA'],loc='lower left',frameon=False)
-ax2.legend(['Group PCA','Multimodal PCA','Multimodal, multisubject PCA'],loc='lower left',frameon=False)
-# ax1.legend(modeltypes)
-ax1.set_ylim(0,60)
-ax2.set_ylim(0,60)
-ax1.set_xticks(np.arange(2,21,2))
-ax2.set_xticks(np.arange(2,21,2))
-ax1.set_title('Train loss')
-ax2.set_title('Test loss')
-ax1.set_xlabel('Model order (K)')
-ax2.set_xlabel('Model order (K)')
-ax1.set_ylabel('Sum of squared errors (SSE)')
-ax2.set_ylabel('Sum of squared errors (SSE)')
-plt.savefig('reports/train_test.png',dpi=600,bbox_inches='tight')
+# ax2.legend(['Group PCA','Multimodal PCA','Multimodal, multisubject PCA'],loc='lower left',frameon=False)
+# # ax1.legend(modeltypes)
+# ax1.set_ylim(0,60)
+# ax2.set_ylim(0,60)
+# ax1.set_xticks(np.arange(2,21,2))
+# ax2.set_xticks(np.arange(2,21,2))
+# ax1.set_title('Train loss')
+# ax2.set_title('Test loss')
+# ax1.set_xlabel('Model order (K)')
+# ax2.set_xlabel('Model order (K)')
+# ax1.set_ylabel('Sum of squared errors (SSE)')
+# ax2.set_ylabel('Sum of squared errors (SSE)')
+plt.savefig('reports/fig2_train_test.png',dpi=600,bbox_inches='tight')
 h = 7
