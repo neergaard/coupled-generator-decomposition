@@ -4,7 +4,6 @@ import torch
 import numpy as np
 from TMMSAA import TMMSAA, TMMSAA_trainer
 from load_data import load_data
-from ica import ica1
 from sklearn.decomposition import FastICA
 #import matplotlib.pyplot as plt
 #from TMMSAA.TMMSAA import SSE

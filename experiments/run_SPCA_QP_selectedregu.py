@@ -63,15 +63,15 @@ def run_model(M1,M2,outer):
                 loss,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=np.array(lambda1),lambda2=np.array(lambda2),max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
                 C = Bp-Bn
             loss_all.extend(loss)
-        np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'_C_'+modeltype+'_rep_'+str(outer)+'_'+str(inner)+'.txt',C,delimiter=',')
+        np.savetxt('data/SPCA_selectedregu_results/'+inf_type+'_C_'+modeltype+'_rep_'+str(outer)+'_'+str(inner)+'.txt',C,delimiter=',')
         if inner==0:
-            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'_losscurve_'+modeltype+'_rep_'+str(outer)+'_'+str(inner)+'.txt',loss_all,delimiter=',')
+            np.savetxt('data/SPCA_selectedregu_results/'+inf_type+'_losscurve_'+modeltype+'_rep_'+str(outer)+'_'+str(inner)+'.txt',loss_all,delimiter=',')
         if modeltype=='mmms_spca':
             for m in range(M):
                 for s in range(16):
-                    np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'_S_'+modeltype+'_'+str(m)+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner)+'.txt',S[m,s],delimiter=',')
+                    np.savetxt('data/SPCA_selectedregu_results/'+inf_type+'_S_'+modeltype+'_'+str(m)+'_'+str(s)+'_rep_'+str(outer)+'_'+str(inner)+'.txt',S[m,s],delimiter=',')
         else:
-            np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'_S_'+modeltype+'_rep'+str(outer)+'_'+str(inner)+'.txt',S,delimiter=',')
+            np.savetxt('data/SPCA_selectedregu_results/'+inf_type+'_S_'+modeltype+'_rep'+str(outer)+'_'+str(inner)+'.txt',S,delimiter=',')
         
         if M2==0:
             losses[inner,0]=best_loss
@@ -83,8 +83,8 @@ def run_model(M1,M2,outer):
             losses[inner,1] = larsqp_trainer.larsqp_eval(X=Xtrain1[modeltype],Xtest=Xtest1[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
             losses[inner,2] = larsqp_trainer.larsqp_eval(X=Xtrain2[modeltype],Xtest=Xtest2[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
             losses[inner,3] = larsqp_trainer.larsqp_eval(X=Xtrain[modeltype],Xtest=Xtest[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
-    np.savetxt('data/SPCA_results_selectedregu/'+inf_type+'_loss_'+modeltype+'_K='+str(K)+'_rep_'+str(outer)+'.txt',losses,delimiter=',')
+    np.savetxt('data/SPCA_selectedregu_results/'+inf_type+'_loss_'+modeltype+'_K='+str(K)+'_rep_'+str(outer)+'.txt',losses,delimiter=',')
             
 
 if __name__=="__main__":
-    run_model(M1=int(sys.argv[1]),M2=int(sys.argv[2]),O=int(sys.argv[3]))
+    run_model(M1=int(sys.argv[1]),M2=int(sys.argv[2]),outer=int(sys.argv[3]))
