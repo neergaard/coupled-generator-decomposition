@@ -4,7 +4,9 @@ import pickle
 import mne_bids
 import numpy as np
 import pandas as pd
-from config import Config
+
+from projects.base.io.organize import FileFormatter, SimnibsOrganizer
+from projects.facerecognition_dtu.config import Config
 
 
 def parse_args_with_mode(argv, prog=None, description=None):

@@ -4,8 +4,11 @@ import mne
 import mne_bids
 import numpy as np
 
-import utils
-from config import Config
+from python.projects.anateeg.utils import parse_args
+from python.projects.facerecognition import preprocess
+
+from python.projects.facerecognition_dtu import utils
+from python.projects.facerecognition_dtu.config import Config
 
 
 def preprocess_raw(raw):
@@ -17,24 +20,26 @@ def preprocess_raw(raw):
     if hasattr(Config.preprocess, "CHANNEL_TYPES"):
         raw.set_channel_types(Config.preprocess.CHANNEL_TYPES)
 
-    
-    try:
-        # Check if data has been SSS filtered. Raises RuntimeError if it
-        # has
-        mne.preprocessing.maxwell._check_info(raw.info)
-        is_maxfiltered = False
-    except RuntimeError:
-        is_maxfiltered = True
-        # When the continuous HPIs are turned on, this creates a lot of
-        # noise. Annotate this segment as bad.
+    channel_types = mne.io.pick._picks_by_type(raw.info)
+    has_meg = preprocess.contains_meg(raw.info)
+    if has_meg:
+        try:
+            # Check if data has been SSS filtered. Raises RuntimeError if it
+            # has
+            mne.preprocessing.maxwell._check_info(raw.info)
+            is_maxfiltered = False
+        except RuntimeError:
+            is_maxfiltered = True
+            # When the continuous HPIs are turned on, this creates a lot of
+            # noise. Annotate this segment as bad.
 
-        # Mark everything prior to first event - 1 s as bad due to cHPI being
-        # turned on
-        onset = raw.first_time
+            # Mark everything prior to first event - 1 s as bad due to cHPI being
+            # turned on
+            onset = raw.first_time
 
-        duration = raw.annotations.onset[0] - 1 - onset
-        description = ["bad_chpi"]
-        raw.annotations.append(onset, duration, description)
+            duration = raw.annotations.onset[0] - 1 - onset
+            description = ["bad_chpi"]
+            raw.annotations.append(onset, duration, description)
 
     raw.load_data()
 
@@ -168,5 +173,42 @@ def preprocess_subject(subject_id):
             cov_noise.save(io.data.get_filename(space="noise", suffix="cov"))
             cov_data.save(io.data.get_filename(space="data", suffix="cov"))
 
+
+    # print("Autoreject")
+    # epochs, ar = prepare_autoreject(epochs)
+    # ar.save(io.data.get_filename(suffix="ar", extension="hdf5"), overwrite=True)
+    # io.data.append(processing="a")
+    # epochs.save(io.data.get_filename(suffix="epo"), overwrite=True)
+
+    # for cov_type, cov_kw in Config.preprocess.COVARIANCE.items():
+    #     cov = mne.compute_covariance(epochs, rank="info", **cov_kw)
+    #     cov.save(io.data.get_filename(space=cov_type, suffix="cov"))
+
+    # print("Denoise")
+    # xdawn_dict = preprocess_denoise_xdawn(
+    #     epochs, n_splits=Config.xdawn.N_SPLITS, n_rounds=Config.xdawn.N_ROUNDS
+    # )
+    # utils.write_pickle(
+    #     xdawn_dict, io.data.get_filename(suffix="xdawn", extension="pkl")
+    # )
+    # epochs = preprocess_denoise_xdawn_transform(epochs, xdawn_dict)
+    # io.data.append(processing="d")
+    # for k, v in epochs.items():
+    #     v.save(io.data.get_filename(space=k, suffix="epo"), overwrite=True)
+
+    # for cov_type, cov_kw in Config.preprocess.COVARIANCE_XDAWN.items():
+    #     cov = mne.compute_covariance(epochs["signal"], **cov_kw)
+    #     cov.save(io.data.get_filename(space=cov_type, suffix="cov"))
+
+    # print("Contrasts")
+    # io.data.update(**Config.preprocess.USE_FOR_CONTRAST)
+    # epochs = mne.read_epochs(io.data.get_filename(suffix="epo"))
+    # evokeds = prepare_contrasts(epochs)
+    # mne.write_evokeds(io.data.get_filename(suffix="ave"), evokeds)
+
+
 if __name__ == "__main__":
-    preprocess_subject('01')
+    #args = parse_args(sys.argv)
+    #subject_id = getattr(args, "subject-id")
+    subject_id = '01'
+    preprocess_subject(subject_id)
