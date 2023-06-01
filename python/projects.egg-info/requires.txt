@@ -1,5 +1,0 @@
-mne
-numpy
-pandas
-pyvista
-scipy
