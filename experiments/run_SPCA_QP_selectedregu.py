@@ -20,7 +20,7 @@ def run_model(M1,M2,outer):
     num_iter_inner = 50
 
     K=5
-
+    
     if M1==0:
     ##### For group_spca
         modeltype = modeltypes[0]

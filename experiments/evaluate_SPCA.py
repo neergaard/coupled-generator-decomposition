@@ -48,5 +48,5 @@ for m,modeltype in enumerate(modeltypes):
 
 plt.figure()
 plt.plot(num_comps,best_loss.T)
-
+plt.savefig('figures_tmp/SPCA_eval.png')
 h = 7
