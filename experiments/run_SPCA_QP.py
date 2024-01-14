@@ -1,58 +1,68 @@
 import sys
-import os.path
 import torch
+import os
 import numpy as np
-from TMMSAA import TMMSAA, TMMSAA_trainer,larsqp,larsqp_trainer
+import pandas as pd
+import larsqp_trainer
 from load_data import load_data
-
+from load_config import load_config
 torch.set_num_threads(8)
+os.environ["OMP_NUM_THREADS"] = "8"
 
-def run_model(M,K,outer,oneinner=0):
-    modeltypes = ['group_spca','mm_spca','mmms_spca']
-    modeltype = modeltypes[M]
+def run_model(modeltype,K):
     
-    Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2 = load_data()
+    # load parameters from params.json file
+    config = load_config()
 
-    l1_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,1,19))))
-    l2_vals = np.array(torch.hstack((torch.tensor(0),torch.logspace(-5,1,7))))
-    # l2_vals = l2_vals[4:]
-    
-    if oneinner==1:
-        num_iter_inner=2
-    else:
-        num_iter_inner = 15
+    # times = torch.load('data/MEEGtimes.pt')
+    # C_idx = np.tile(times>=0.0,3)
+    C_idx = None
 
-    for inner in range(num_iter_inner):
-        if os.path.isfile("data/SPCA_QP_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
+    # common initialization
+    X_train,_ = load_data(data_pool='all',type='group',preproc='FT_frob')
+    print('Calculating group PCA initialization...')
+    # _,_,V_group_pca = torch.pca_lowrank(X_train['all'][...,torch.tensor(C_idx)],q=K,niter=100)
+    _,_,V_group_pca = torch.pca_lowrank(X_train['all'],q=K,niter=100)
+    Bp_init0 = np.array(torch.nn.functional.relu(V_group_pca))
+    Bn_init0 = np.array(torch.nn.functional.relu(-V_group_pca))
+
+    l1_vals = np.hstack((np.array(0),np.logspace(config['lowest_l1_log'],config['highest_l1_log'],config['highest_l1_log']-config['lowest_l1_log']+1)))
+    l2_vals = np.hstack((np.array(0),np.logspace(config['lowest_l2_log'],config['highest_l2_log'],config['highest_l2_log']-config['lowest_l2_log']+1)))
+
+    # if df exists already, load, otherwise make new
+    try:
+        df = pd.read_csv('data/SPCA_results/SPCA_QP_results_K='+str(K)+'_'+modeltype+'.csv')
+    except:
+        df = pd.DataFrame(columns=['modeltype','K','lambda1','lambda2','inner','iter','train_loss','test_loss'])
+
+    # loop over group, multimodal, and multimodal+multisubject
+    X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob',as_numpy_array=True)
+
+    for inner in range(config['num_iter_LR_selection']):  
+        # if inner already done, skip
+        if len(df[df['inner']==inner])>0:
             continue
-        all_train_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test1_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test2_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test12_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        for l2,lambda2 in enumerate(l2_vals):
-            Bp = None # random initialization, then annealing
-            Bn = None
-            loss_curves = []
-            loss_curve_lengths = []
+        rows_list = []
+        for lambda2 in l2_vals:
             for l1,lambda1 in enumerate(l1_vals):
-                loss_lars,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=Xtrain[modeltype],num_comp=K,lambda1=lambda1,lambda2=lambda2,max_iter=10000, tol=1e-6,Bp_init=Bp,Bn_init=Bn)
-                all_train_loss[l2,l1] = loss_lars[-1]
-                all_test1_loss[l2,l1] = larsqp_trainer.larsqp_eval(X=Xtrain1[modeltype],Xtest=Xtest1[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
-                all_test2_loss[l2,l1] = larsqp_trainer.larsqp_eval(X=Xtrain2[modeltype],Xtest=Xtest2[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
-                all_test12_loss[l2,l1] = larsqp_trainer.larsqp_eval(X=Xtrain[modeltype],Xtest=Xtest[modeltype],Bp=Bp,Bn=Bn,num_comp=K)
-                loss_curves.extend(loss_lars)
-                loss_curve_lengths.append(len(loss_lars))
-            if oneinner==1:
-                np.savetxt("data/SPCA_QP_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
-                np.savetxt("data/SPCA_QP_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
-        if oneinner!=1:
-            np.savetxt("data/SPCA_QP_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
-            np.savetxt("data/SPCA_QP_results/test1_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test1_loss,delimiter=',')
-            np.savetxt("data/SPCA_QP_results/test2_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test2_loss,delimiter=',')
-            np.savetxt("data/SPCA_QP_results/test12_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test12_loss,delimiter=',')
+                print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'inner=',inner)
+                if l1==0:
+                    loss,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=X_train,num_comp=K,lambda1=lambda1,lambda2=lambda2,Bp_init=Bp_init0,Bn_init=Bn_init0,max_iter=config['max_iterations'], tol=config['tolerance'],C_idx=C_idx)
+                else:
+                    loss,Bp,Bn,S = larsqp_trainer.Optimizationloop(X=X_train,num_comp=K,lambda1=lambda1,lambda2=lambda2,Bp_init=Bp,Bn_init=Bn,max_iter=config['max_iterations'], tol=config['tolerance'],C_idx=C_idx)
+                
+                test_loss = larsqp_trainer.larsqp_eval(Xtrain=X_train,Xtraintilde=X_train,Xtest=X_test,Bp=Bp,Bn=Bn,num_comp=K,C_idx=C_idx)
+                entry = {'modeltype':modeltype,'K':K,'lambda2':lambda2,'lambda1':lambda1,'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'test_loss':test_loss}
+                rows_list.append(entry)
+        df = pd.concat([df,pd.DataFrame(rows_list)],ignore_index=True)
+        df.to_csv('data/SPCA_results/SPCA_QP_results_K='+str(K)+'_'+modeltype+'.csv',index=False)
 
 if __name__=="__main__":
+    modeltype = ['group','mm','mmms']
+
     if len(sys.argv)>1:
-        run_model(M=int(sys.argv[1]),K=int(sys.argv[2]),outer=int(sys.argv[3]),oneinner=int(sys.argv[4]))
+        M = int(sys.argv[1])
+        K = int(sys.argv[2])
+        run_model(modeltype=modeltype[M],K=K)
     else:
-        run_model(M=2,K=5,outer=0)
+        run_model(modeltype='group',K=5)

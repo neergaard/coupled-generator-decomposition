@@ -1,7 +1,8 @@
 import torch
 import numpy as np
 import pandas as pd
-from TMMSAA import TMMSAA, TMMSAA_trainer
+import TMMSAA
+import TMMSAA_trainer
 from load_data import load_data
 from load_config import load_config
 torch.set_num_threads(16)
@@ -15,6 +16,9 @@ def main(modeltype):
     # common initialization
     X_train,_ = load_data(data_pool='all',type='group',preproc='FT_frob')
     print('Calculating group PCA initialization...')
+    # _,_,V_group_pca = torch.pca_lowrank(X_train['all'][...,C_idx],q=K,niter=100)
+    _,_,V_group_pca = torch.pca_lowrank(X_train['all'],q=K,niter=100)
+    print('Calculating group PCA initialization...')
     _,_,V_group_pca = torch.pca_lowrank(X_train['all'],q=K,niter=100)
     init0 = {'Bp':torch.nn.functional.relu(V_group_pca),'Bn':torch.nn.functional.relu(-V_group_pca)}
 
@@ -22,13 +26,21 @@ def main(modeltype):
     l2_vals = torch.hstack((torch.tensor(0),torch.logspace(config['lowest_l2_log'],config['highest_l2_log'],config['highest_l2_log']-config['lowest_l2_log']+1)))
     lrs = torch.logspace(-5,-1,5) #-6 is too small
 
-    df = pd.DataFrame(columns=['modeltype','K','lambda1','lambda2','lr','inner','outer','iter','train_loss','test_loss'])
+    try:
+        df = pd.read_csv('data/SPCA_LR_results_K='+str(K)+'_'+modeltype+'.csv')
+    except:
+        df = pd.DataFrame(columns=['modeltype','K','lambda1','lambda2','lr','inner','iter','train_loss','test_loss'])
 
     # loop over group, multimodal, and multimodal+multisubject
     X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob')
 
     for inner in range(config['num_iter_LR_selection']):
+        if len(df[df['inner']==inner])>0:
+            continue
         for lr in lrs:
+            dftmp = df[df['inner']==inner]
+            if len(dftmp[dftmp['lr']==lr])>0:
+                continue
             rows_list = []
             for lambda2 in l2_vals:
                 for l1,lambda1 in enumerate(l1_vals):
@@ -47,9 +59,9 @@ def main(modeltype):
                     entry = {'modeltype':modeltype,'lr':lr.item(),'K':K,'lambda2':lambda2.item(),'lambda1':lambda1.item(),'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'test_loss':test_loss}
                     rows_list.append(entry)
             df = pd.concat([df,pd.DataFrame(rows_list)],ignore_index=True)
-            df.to_csv('data/SPCA_LR_results_K='+str(K)+'_'+modeltype,'.csv',index=False)
+            df.to_csv('data/SPCA_LR_results_K='+str(K)+'_'+modeltype+'.csv',index=False)
 
 if __name__ == '__main__':
     modeltype = ['group','mm','mmms']
-    main(modeltype[1])
+    main(modeltype[2])
     

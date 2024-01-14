@@ -1,73 +1,71 @@
 import sys
-import os.path
 import torch
 import numpy as np
-from TMMSAA import TMMSAA, TMMSAA_trainer
+import pandas as pd
+import TMMSAA
+import TMMSAA_trainer
 from load_data import load_data
+from load_config import load_config
 torch.set_num_threads(8)
 
-def run_model(M,K,outer,oneinner=0):
-    if M==0:
-        modeltype='group_spca'
-        num_modalities=1
-    elif M==1:
-        modeltype='mm_spca'
-        num_modalities=2
-    elif M==2:
-        modeltype='mmms_spca'
-        num_modalities=2
+def run_model(modeltype,K):
     
-    Xtrain,Xtest,Xtrain1,Xtrain2,Xtest1,Xtest2 = load_data()
+    # load parameters from params.json file
+    config = load_config()
 
-    dims = {'group_spca':Xtrain['group_spca'].shape,'mm_spca':Xtrain['mm_spca']["EEG"].shape,'mmms_spca':Xtrain['mmms_spca']["EEG"].shape}
-    #C_idx = torch.hstack((torch.zeros(20, dtype=torch.bool), torch.ones(160, dtype=torch.bool)))
+    # times = torch.load('data/MEEGtimes.pt')
+    # C_idx = torch.tensor(np.tile(times>=0.0,3))
+    C_idx = None
 
-    l1_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,1,19)))
-    l2_vals = torch.hstack((torch.tensor(0),torch.logspace(-5,1,7)))
-    # l2_vals = l2_vals[4:]
+    # common initialization
+    X_train,_ = load_data(data_pool='all',type='group',preproc='FT_frob')
+    print('Calculating group PCA initialization...')
+    # _,_,V_group_pca = torch.pca_lowrank(X_train['all'][...,C_idx],q=K,niter=100)
+    _,_,V_group_pca = torch.pca_lowrank(X_train['all'],q=K,niter=100)
+    init0 = {'Bp':torch.nn.functional.relu(V_group_pca),'Bn':torch.nn.functional.relu(-V_group_pca)}
 
-    if oneinner==1:
-        num_iter_inner=2
-    else:
-        num_iter_inner = 15
+    l1_vals = torch.hstack((torch.tensor(0),torch.logspace(config['lowest_l1_log'],config['highest_l1_log'],config['highest_l1_log']-config['lowest_l1_log']+1)))
+    l2_vals = torch.hstack((torch.tensor(0),torch.logspace(config['lowest_l2_log'],config['highest_l2_log'],config['highest_l2_log']-config['lowest_l2_log']+1)))
 
-    for inner in range(num_iter_inner):
-        if os.path.isfile("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt'):
+    # if df exists already, load, otherwise make new
+    try:
+        df = pd.read_csv('data/SPCA_results/SPCA_results_K='+str(K)+'_'+modeltype+'.csv')
+    except:
+        df = pd.DataFrame(columns=['modeltype','K','lambda1','lambda2','inner','iter','train_loss','test_loss'])
+
+    # loop over group, multimodal, and multimodal+multisubject
+    X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob')
+
+    for inner in range(config['num_iter_LR_selection']):  
+        # if inner already done, skip
+        if len(df[df['inner']==inner])>0:
             continue
-
-        all_train_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test1_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test2_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        all_test12_loss = np.zeros((len(l2_vals),len(l1_vals)))
-        for l2,lambda2 in enumerate(l2_vals):
-            init = None
-            loss_curves = []
-            loss_curve_lengths = []
+        rows_list = []
+        for lambda2 in l2_vals:
             for l1,lambda1 in enumerate(l1_vals):
-                model = TMMSAA.TMMSAA(dimensions=dims[modeltype],num_comp=K,num_modalities=num_modalities,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
-                optimizer = torch.optim.Adam(model.parameters(), lr=0.1)
-                scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,threshold=1e-4,threshold_mode='abs',min_lr=0.0001,patience=100)
-                loss,best_loss = TMMSAA_trainer.Optimizationloop(model=model,X=Xtrain[modeltype],optimizer=optimizer,scheduler=scheduler,max_iter=30000,tol=1e-4)
-                C,S,Bp,Bn = model.get_model_params(X=Xtrain[modeltype])
+                print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'inner=',inner)
+                if l1==0:
+                    model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
+                else:
+                    model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
+                
+                optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+                loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=True)
+                C,S,Bp,Bn = model.get_model_params()
                 init={'Bp':Bp,'Bn':Bn}
-                loss_curves.extend(loss)
-                loss_curve_lengths.append(len(loss))
 
-                all_test1_loss[l2,l1] = model.eval_model(Xtrain=Xtrain1[modeltype],Xtraintilde=Xtrain1[modeltype],Xtest=Xtest1[modeltype])
-                all_test2_loss[l2,l1] = model.eval_model(Xtrain=Xtrain2[modeltype],Xtraintilde=Xtrain2[modeltype],Xtest=Xtest2[modeltype])
-                all_test12_loss[l2,l1] = model.eval_model(Xtrain=Xtrain[modeltype],Xtraintilde=Xtrain[modeltype],Xtest=Xtest[modeltype])
-                all_train_loss[l2,l1] = best_loss
-            if oneinner==1:
-                np.savetxt("data/SPCA_results/train_loss_curve"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curves,delimiter=',')
-                np.savetxt("data/SPCA_results/train_loss_curve_len"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',loss_curve_lengths,delimiter=',')
-        if oneinner!=1:
-            np.savetxt("data/SPCA_results/train_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_train_loss,delimiter=',')
-            np.savetxt("data/SPCA_results/test1_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test1_loss,delimiter=',')
-            np.savetxt("data/SPCA_results/test2_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test2_loss,delimiter=',')
-            np.savetxt("data/SPCA_results/test12_loss_"+modeltype+"_K="+str(K)+"_rep_"+str(outer)+"_"+str(inner)+'.txt',all_test12_loss,delimiter=',')
+                test_loss = model.eval_model(Xtrain=X_train,Xtraintilde=None,C_idx=C_idx,Xtest=X_test)
+                entry = {'modeltype':modeltype,'K':K,'lambda2':lambda2.item(),'lambda1':lambda1.item(),'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'test_loss':test_loss}
+                rows_list.append(entry)
+        df = pd.concat([df,pd.DataFrame(rows_list)],ignore_index=True)
+        df.to_csv('data/SPCA_results/SPCA_results_K='+str(K)+'_'+modeltype+'.csv',index=False)
 
 if __name__=="__main__":
+    modeltype = ['group','mm','mmms']
+
     if len(sys.argv)>1:
-        run_model(M=int(sys.argv[1]),K=int(sys.argv[2]),outer=int(sys.argv[3]),oneinner=int(sys.argv[4]))
+        M = int(sys.argv[1])
+        K = int(sys.argv[2])
+        run_model(modeltype=modeltype[M],K=K)
     else:
-        run_model(M=2,K=5,outer=0)
+        run_model(modeltype='group',K=5)

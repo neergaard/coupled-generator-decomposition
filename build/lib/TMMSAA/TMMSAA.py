@@ -41,10 +41,11 @@ class TMMSAA(torch.nn.Module):
         print('Initializing model: '+model)
         t1 = time()
         self.model = model
+        self.keys = X.keys()
 
         num_modalities = len(X)
-        P = X[list(X.keys())[0]].shape[-1]
-        other_dims = list(X[list(X.keys())[0]].shape[:-2])
+        P = X[list(self.keys)[0]].shape[-1]
+        other_dims = list(X[list(self.keys)[0]].shape[:-2])
         self.keys = X.keys()
 
         # Allow for the shared generator matrix to only learn from part of the data (dimension P),
@@ -55,22 +56,18 @@ class TMMSAA(torch.nn.Module):
         
         self.X = X
         if Xtilde is None:
-            Xtilde = {}
+            self.Xtilde = {}
             for key in self.keys:
-                Xtilde[key] = X[key][..., self.C_idx].clone()
-        self.Xtilde = Xtilde
+                self.Xtilde[key] = X[key][..., self.C_idx].clone()
         
-        self.XtXtilde = {}
         if model == "SPCA" or model == "AA":
-            self.Xsqnorm = {}
-            for key in self.keys:
-                self.Xsqnorm[key] = torch.sum(torch.linalg.matrix_norm(self.X[key],ord='fro')**2)
-                self.XtXtilde[key] = torch.transpose(self.X[key], -2, -1) @ self.Xtilde[key]
+            self.Xsqnorm = torch.zeros(num_modalities,dtype=torch.double)
+            self.XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(C_idx)),dtype=torch.double)
+            for m,key in enumerate(self.keys):
+                self.Xsqnorm[m] = torch.sum(torch.linalg.matrix_norm(self.X[key],ord='fro')**2)
+                self.XtXtilde[m] = torch.transpose(self.X[key], -2, -1) @ self.Xtilde[key]
 
-        if other_dims == []:
-            self.S_size = [num_modalities, num_comp, P]
-        else:
-            self.S_size = [num_modalities, other_dims, num_comp, P]
+        self.S_size = [num_modalities, *other_dims, num_comp, P]
         
         if self.model=='AA' or self.model=='DAA':
             self.softmaxC = torch.nn.Softmax(dim=0)
@@ -111,13 +108,18 @@ class TMMSAA(torch.nn.Module):
                 Bnsoft = self.softplus(self.Bn)
                 C = Bpsoft - Bnsoft 
                 S = torch.zeros(self.S_size,dtype=torch.double)
-                for m,key in enumerate(self.keys):
-                    U,_,Vt = torch.linalg.svd(self.XtXtilde[key] @ C,full_matrices=False)
-                    S[m] = torch.transpose(U@Vt,-2,-1)
+                U,_,Vt = torch.linalg.svd(self.XtXtilde @ C,full_matrices=False)
+                S = torch.transpose(U@Vt,-2,-1)
                 return C, S,self.Bp.detach(),self.Bn.detach()
 
-    def eval_model(self, Xtrain,Xtraintilde,Xtest):
+    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None):
         with torch.no_grad():
+            if C_idx is None:
+                C_idx = torch.ones(Xtrain[list(self.keys)[0]].shape[-1],dtype=torch.bool)
+            if Xtraintilde is None:
+                Xtraintilde = {}
+                for key in self.keys:
+                    Xtraintilde[key] = Xtrain[key][..., C_idx].clone()
             if self.model == 'AA' or self.model == 'DAA':
                 S = self.softmaxS(self.S)
                 C = self.softmaxC(self.C)
@@ -137,7 +139,7 @@ class TMMSAA(torch.nn.Module):
     def forwardDAA(self, X, Xtilde,C_soft,S_soft):
         loss = 0 
         for key in self.keys:
-            XC = Xtilde[key][..., self.C_idx] @ C_soft
+            XC = Xtilde[key] @ C_soft
             XCtXC = torch.swapaxes(XC, -2, -1) @ XC
             XCtXC = torch.swapaxes(XC, -2, -1) @ XC
             XtXC = torch.swapaxes(X[key], -2, -1) @ XC
@@ -150,7 +152,7 @@ class TMMSAA(torch.nn.Module):
         return loss
     
     def SSE(self,XtXtilde,Xtilde,C,S,Xsqnorm):
-        XC = Xtilde[..., self.C_idx] @ C
+        XC = Xtilde @ C
         XtXC = XtXtilde @ C
 
         SSE = (
@@ -169,12 +171,12 @@ class TMMSAA(torch.nn.Module):
     def forwardSPCA(self,C):
         # in Zou, Hastie, Tibshirani, B is here C and A is here S
         loss = 0
-        for key in self.keys:
-            XC = self.Xtilde[key][..., self.C_idx] @ C
-            XtXC = self.XtXtilde[key] @ C
-            U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
-            S = torch.transpose(U@Vt,-2,-1)
-            SSE = self.Xsqnorm[key] - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S) + torch.sum(XC*XC) #correct
+        XtXC = self.XtXtilde @ C
+        U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
+        S = torch.transpose(U@Vt,-2,-1)
+        for m,key in enumerate(self.keys):
+            XC = self.Xtilde[key] @ C
+            SSE = self.Xsqnorm[m] - 2 * torch.sum(torch.transpose(XtXC[m], -2, -1) * S[m]) + torch.sum(XC*XC) #correct
             loss += SSE
         return loss
 

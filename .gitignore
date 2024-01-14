@@ -1,5 +1,5 @@
 freesurfer/
 slurm/
-submitfiles/*.txt
+submitfiles/logs/
 *.pyc
 data/

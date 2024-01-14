@@ -1,6 +1,7 @@
 import torch
+import numpy as np
 
-def load_data(data_pool='all',type='mmmsmc',preproc='FT_frob'):
+def load_data(data_pool='all',type='mmmsmc',preproc='FT_frob',as_numpy_array=False):
     print('Loading data...')
     modality_names = ["EEG", "MEG"]
     num_subs = 16
@@ -57,7 +58,17 @@ def load_data(data_pool='all',type='mmmsmc',preproc='FT_frob'):
             X_test1.pop('MEG')
             X_test2.pop('EEG')
             X_test2.pop('MEG')
-
+    if as_numpy_array:
+        if data_pool == 'all':
+            for key in X_train.keys():
+                X_train[key] = np.array(X_train[key])
+                X_test[key] = np.array(X_test[key])
+        elif data_pool == 'half':
+            for key in X_train1.keys():
+                X_train1[key] = np.array(X_train1[key])
+                X_train2[key] = np.array(X_train2[key])
+                X_test1[key] = np.array(X_test1[key])
+                X_test2[key] = np.array(X_test2[key])
     if data_pool == 'all':
         return X_train,X_test
     elif data_pool == 'half':
