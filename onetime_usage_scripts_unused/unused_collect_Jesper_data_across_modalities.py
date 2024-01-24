@@ -16,7 +16,7 @@ for split in range(2):
             sub_id = f'{(sub+1):02d}'
             
             # EEG
-            evo = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+            evo = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                    +"task-facerecognition_proc-p_cond-"+cond+"_split-"+str(split)+"_evo.fif")
             evo = evo[0]
             evo.pick('eeg')
@@ -24,7 +24,7 @@ for split in range(2):
             X_EEG[sub,cond_idx,:,:] = data/torch.norm(data,p='fro')
 
             # MEG
-            evo = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+            evo = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                    +"task-facerecognition_proc-p_cond-"+cond+"_split-"+str(split)+"_evo.fif")
             evo = evo[0]
             evo.pick_types('mag')
@@ -43,13 +43,13 @@ for sub in range(num_subjects):
         sub_id = f'{(sub+1):02d}'
         
         # EEG
-        evo0 = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+        evo0 = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                 +"task-facerecognition_proc-p_cond-"+cond+"_split-0_evo.fif")
         evo0 = evo0[0]
         evo0.pick('eeg')
         data0 = torch.tensor(evo0.data)
 
-        evo1 = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+        evo1 = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                 +"task-facerecognition_proc-p_cond-"+cond+"_split-1_evo.fif")
         evo1 = evo1[0]
         evo1.pick('eeg')
@@ -82,13 +82,13 @@ for sub in range(num_subjects):
         sub_id = f'{(sub+1):02d}'
         
         # EEG
-        evo0 = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+        evo0 = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                 +"task-facerecognition_proc-p_cond-"+cond+"_split-0_evo.fif")
         evo0 = evo0[0]
         evo0.pick_types('mag')
         data0 = torch.tensor(evo0.data)
 
-        evo1 = mne.read_evokeds("data/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
+        evo1 = mne.read_evokeds("data/JesperProcessed/sub-"+sub_id+"/ses-meg/stage-preprocess/"\
                                 +"task-facerecognition_proc-p_cond-"+cond+"_split-1_evo.fif")
         evo1 = evo1[0]
         evo1.pick_types('mag')

@@ -6,11 +6,20 @@ def load_data(data_pool='all',type='mmmsmc',preproc='FT_frob',as_numpy_array=Fal
     modality_names = ["EEG", "MEG"]
     num_subs = 16
 
-    X_train = X_train1 = X_train2 = {}
-    X_test = X_test1 = X_test2 = {}
+    X_train = {}
+    X_train1 = {}
+    X_train2 = {}
+    X_test = {}
+    X_test1 = {} 
+    X_test2 = {}
     for m in modality_names:
-        data_train = torch.load("data/concatenatedData/X_" + m + "_" + preproc + "0.pt")
-        data_test = torch.load("data/concatenatedData/X_" + m + "_" + preproc + "1.pt")
+        if preproc=='FT_frob' or preproc=='split':
+            data_train = torch.load("data/concatenatedData/X_" + m + "_" + preproc + "0.pt")
+            data_test = torch.load("data/concatenatedData/X_" + m + "_" + preproc + "1.pt")
+        elif preproc=='FT_l2':
+            data_train = torch.load("data/concatenatedData/Xf_" + m + "_FT0.pt")
+            data_test = torch.load("data/concatenatedData/Xf_" + m + "_FT1.pt")
+
         if data_pool == 'all':
             if type == 'mmmsmc':
                 X_train = data_train

@@ -14,6 +14,7 @@ def main(modeltype):
 
     K=5
     # common initialization
+    C_idx = None
     X_train,_ = load_data(data_pool='all',type='group',preproc='FT_frob')
     print('Calculating group PCA initialization...')
     # _,_,V_group_pca = torch.pca_lowrank(X_train['all'][...,C_idx],q=K,niter=100)
@@ -32,7 +33,8 @@ def main(modeltype):
         df = pd.DataFrame(columns=['modeltype','K','lambda1','lambda2','lr','inner','iter','train_loss','test_loss'])
 
     # loop over group, multimodal, and multimodal+multisubject
-    X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob')
+    X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob') #this one on all data...
+    # X_train1,X_train2,X_test1_X_test2 = load_data(data_pool='half',type=modeltype,preproc='FT_frob')
 
     for inner in range(config['num_iter_LR_selection']):
         if len(df[df['inner']==inner])>0:
@@ -46,9 +48,9 @@ def main(modeltype):
                 for l1,lambda1 in enumerate(l1_vals):
                     print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'lr=',lr,'inner=',inner)
                     if l1==0:
-                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0)
+                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
                     else:
-                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init)
+                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
                     
                     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
                     loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=True)

@@ -5,7 +5,7 @@ import cvxopt
 cvxopt.solvers.options['show_progress'] = False
 import time
 
-def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=None,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None):
+def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=None,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None,disable_output=False):
     
     ##### LARS-QP initialization #####
     t1 = time.time()
@@ -40,8 +40,8 @@ def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=No
     h = cvxopt.matrix(np.zeros(2*P))
 
     if Bp_init is None and Bn_init is None:
-        Bp = np.random.uniform(size=(P, num_comp))
-        Bn = np.random.uniform(size=(P, num_comp))
+        Bp = np.random.standard_normal(size=(P, num_comp))
+        Bn = np.random.standard_normal(size=(P, num_comp))
     else:
         Bp = Bp_init 
         Bn = Bn_init
@@ -51,7 +51,7 @@ def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=No
 
     ##### LARS-QP optimization #####
     all_loss = []
-    for epoch in tqdm(range(max_iter)):
+    for epoch in tqdm(range(max_iter),disable=disable_output):
         initvals = cvxopt.matrix(np.concatenate((Bp,Bn),axis=0))
 
         U,_,Vt = np.linalg.svd(XtXtilde @ (Bp-Bn),full_matrices=False)

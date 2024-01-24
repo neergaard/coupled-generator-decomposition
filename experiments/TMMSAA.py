@@ -127,12 +127,12 @@ class TMMSAA(torch.nn.Module):
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
                 C = Bpsoft - Bnsoft 
+                for key in self.keys:
+                    U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
+                    S = torch.transpose(U@Vt,-2,-1)
             
             loss = 0
             for key in self.keys:
-                if self.model == 'SPCA':
-                    U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
-                    S = torch.transpose(U@Vt,-2,-1)
                 loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@C@S)**2)
         return loss.item()
 
@@ -164,8 +164,12 @@ class TMMSAA(torch.nn.Module):
     
     def forwardAA(self,C_soft,S_soft):
         loss = 0
-        for key in self.keys:
-            loss += self.SSE(self.XtXtilde[key],self.Xtilde[key],C_soft,S_soft,self.Xsqnorm[key])
+        XtXC = self.XtXtilde @ C_soft
+        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S_soft)
+        for m,key in enumerate(self.keys):
+            XC = self.Xtilde[key] @ C_soft
+            SSE = torch.sum(XC*XC) #correct
+            loss += SSE
         return loss
     
     def forwardSPCA(self,C):
@@ -174,9 +178,10 @@ class TMMSAA(torch.nn.Module):
         XtXC = self.XtXtilde @ C
         U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
         S = torch.transpose(U@Vt,-2,-1)
+        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
         for m,key in enumerate(self.keys):
             XC = self.Xtilde[key] @ C
-            SSE = self.Xsqnorm[m] - 2 * torch.sum(torch.transpose(XtXC[m], -2, -1) * S[m]) + torch.sum(XC*XC) #correct
+            SSE = torch.sum(XC*XC) #correct
             loss += SSE
         return loss
 
