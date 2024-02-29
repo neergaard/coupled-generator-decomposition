@@ -2,7 +2,7 @@ data/
 data/concatenatedData/
 data/MEEGtimes.pt
 tmp.png
-*.egg-info/
+TMMSAA.egg-info/
 .vscode/
 onetime_usage_scripts_unused/
 submitfiles/
