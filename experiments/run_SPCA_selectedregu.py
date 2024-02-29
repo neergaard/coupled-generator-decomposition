@@ -2,8 +2,7 @@ import sys
 import torch
 import numpy as np
 import pandas as pd
-import TMMSAA
-import TMMSAA_trainer
+from CGD import CGD, CGD_trainer
 from load_data import load_data
 from load_config import load_config
 torch.set_num_threads(8)
@@ -55,20 +54,20 @@ def run_model(modeltype,K):
             for l1,lambda1 in enumerate(l1_vals):
                 print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'inner=',inner)
                 if l1==0:
-                    model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
+                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
                 else:
-                    model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
+                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
                 
                 optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
-                loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
+                loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
                 C,S,Bp,Bn = model.get_model_params()
                 init={'Bp':Bp,'Bn':Bn}
         else:
             init0 = None
-            model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model=model1,init=init0,C_idx=C_idx)
+            model = CGD.CGD(X=X_train,num_comp=K,model=model1,init=init0,C_idx=C_idx)
             
             optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
-            loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
+            loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
             C,S = model.get_model_params()
 
         val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,C_idx=C_idx,Xtest=X_test1,AAsubjects=torch.tensor([1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],dtype=torch.bool))

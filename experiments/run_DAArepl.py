@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 import numpy as np
-from TMMSAA import TMMSAA, TMMSAA_trainer, visualize_AA_trajectory
+from CGD import TMMSAA, TMMSAA_trainer, visualize_AA_trajectory
 
 modalitynames = ["EEG", "MEG"]
 M = len(modalitynames)

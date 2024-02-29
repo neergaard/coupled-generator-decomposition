@@ -2,8 +2,7 @@ import sys
 import torch
 import numpy as np
 import pandas as pd
-import TMMSAA
-import TMMSAA_trainer
+from CGD import CGD, CGD_trainer
 from load_data import load_data
 from load_config import load_config
 torch.set_num_threads(8)
@@ -33,10 +32,10 @@ def run_model(modeltype,K):
             continue
         rows_list = []
         print('Beginning modeltype=',modeltype,'K=',K,'inner=',inner)
-        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='AA',init=None,C_idx=C_idx)
+        model = CGD.CGD(X=X_train,num_comp=K,model='AA',init=None,C_idx=C_idx)
         
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
-        loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
+        loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
         C,S = model.get_model_params()
     
         val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,C_idx=C_idx,Xtest=X_test1)

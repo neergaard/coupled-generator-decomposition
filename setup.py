@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
 setup(
-    name='TMMSAA',
+    name='CGD',
     packages=find_packages(),
 )

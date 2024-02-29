@@ -2,50 +2,54 @@
 import torch
 from time import time
 
-class TMMSAA(torch.nn.Module):
+class CGD(torch.nn.Module):
     """
-    Coupled generator decomposition model for variable number of tensor dimensions.
+    Coupled generator decomposition model for variable number of input data dimensions.
 
-    The input data X should be a dictionary of torch tensors. 
-    Each tensor should be of size (*,N,P), where:
-    * - indicates an arbitrary number of dimensions, e.g., subjects or conditions.
-    N - the dimension that may vary across modalities if X is a dictionary of tensors,
-    e.g., the (variable) number sensors in EEG/MEG for a temporal decomposition or the
-    variable number of time points in EEG/fMRI for a spatial decomposition.
-    P - the dimension that is fixed and assumed equal across modalities. If a temporal
-    decomposition, this would be the number of samples. If a spatial decomposition, this
-    would be the number of voxels or surface points.
+    ***The input data X should always be a dictionary of torch tensors. ***
 
-    Each entry in the dictionary may represent a different modality, subject, or condition, 
-    where the number of samples differs. THUS, say you have a multimodal, multisubject setup where 
-    N differs between modalities but not subjects, input a dictionary "data", with entries, 
-    e.g., data['mod1'] and data['mod2'], where data['mod1'].shape = (*,N1,P) and data['mod2'].shape = (*,N2,P).
+    If you have data of varying dimensions, such as EEG/MEG, then the data for these should
+    be in each their own tensor, and the tensors should be input as a dictionary, e.g., X = {'EEG':EEGdata,'MEG':MEGdata}.
+    For example, EEGdata could be of size (*,N_EEG,P):
+    *       - indicates other dimensions, e.g., subjects or conditions, across which N and P are equal.
+    N_EEG   - the number of EEG sensors (this may vary between dictionary entries)
+    P       - the number of samples (this is assumed equal across dictionary entries)
 
-    The model learns a shared generator matrix C (P,K) and a mixing matrix S (*,K,P) with
-    different properties depending on the model:
+    Required inputs:
+    num_comp - the number of components to learn
+    X - a dictionary of torch tensors.
 
-    SpPCA: Sparse Principal Component Analysis
+    Optional inputs:
+    Xtilde - a dictionary of torch tensors. If not specified, Xtilde is assumed to be equal to X.
+    model - the model to use. Options are 'SPCA', 'AA', 'DAA'. Default is 'SPCA'.
+    C_idx - a boolean tensor of size (P,) indicating which dimensions to construct Xtilde from (default all ones).
+    lambda1 - the L1 regularization parameter for SPCA. 
+    lambda2 - the L2 regularization parameter for SPCA.
+    init - a dictionary of torch tensors, specifying the initial values for G (and S, if model=='AA').
 
-    CCD: Convec Cone Decomposition
-    S is assumed non-negative
+    The models that may be learned using coupled generator decomposition are:
+    SpPCA: Sparse Principal Component Analysis, in which l1 and l2 regularization coefficients must be provided.
+    For sparse PCA, the model optimizes a shared generator matrix G (P,K) and a mixing matrix S (*,K,P) is
+    inferred using a procrustes transformation through (X.T@Xtilde)@G. 
+    AA: Archetypal Analysis, in which the model optimizes a shared generator matrix G (P,K) and a mixing matrix S (*,K,P).
+    Both G and S are assumed non-negative and sum-to-one constraints enforced through the softmax function. For G, the sum-to-one
+    constraint is enforced across the first dimension, while for S, the sum-to-one constraint is enforced across the second dimension.
+    DAA: Directional Archetypal Analysis, which works similarly to AA except the data are assumes to be on a sign-invariant hypersphere. 
 
-    AA: Archetypal Analysis.
-    C and S are non-negative and sum-to-one across the first dimension. S is then assumed
-    to be on the simplex and the archetypes learned constitute extremes or corners in the data
-
-    The number of components K is a required input to the model. 
+    Author: Anders S Olsen, DTU Compute, 2023-2024
+    Latest update February 2024
     """
 
     def __init__(self,  num_comp, X, Xtilde=None, model="SPCA", C_idx=None,lambda1=None,lambda2=None,init=None):
         super().__init__()
         print('Initializing model: '+model)
         t1 = time()
+        
         self.model = model
-        self.keys = X.keys()
 
-        num_modalities = len(X)
-        P = X[list(self.keys)[0]].shape[-1]
-        other_dims = list(X[list(self.keys)[0]].shape[:-2])
+        num_modalities = len(X) #infer number of modalities from number of entries in dictionary X
+        P = X[list(self.keys)[0]].shape[-1] #P should be equal across all dictionary entries
+        other_dims = list(X[list(self.keys)[0]].shape[:-2]) #other dimensions, except N
         self.keys = X.keys()
 
         # Allow for the shared generator matrix to only learn from part of the data (dimension P),
@@ -60,6 +64,7 @@ class TMMSAA(torch.nn.Module):
             for key in self.keys:
                 self.Xtilde[key] = X[key][..., self.C_idx].clone()
         
+        # precompute some quantities for the SPCA and AA models
         if model == "SPCA" or model == "AA":
             self.Xsqnorm = torch.zeros(num_modalities,dtype=torch.double)
             self.XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(C_idx)),dtype=torch.double)
@@ -69,6 +74,7 @@ class TMMSAA(torch.nn.Module):
 
         self.S_size = [num_modalities, *other_dims, num_comp, P]
         
+        # initialize variables
         if self.model=='AA' or self.model=='DAA':
             self.softmaxC = torch.nn.Softmax(dim=0)
             self.softmaxS = torch.nn.Softmax(dim=-2)
@@ -112,7 +118,7 @@ class TMMSAA(torch.nn.Module):
                 S = torch.transpose(U@Vt,-2,-1)
                 return C, S,self.Bp.detach(),self.Bn.detach()
 
-    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None,AAsubjects=None):
+    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None):
         with torch.no_grad():
             if C_idx is None:
                 C_idx = torch.ones(Xtrain[list(self.keys)[0]].shape[-1],dtype=torch.bool)
@@ -121,10 +127,7 @@ class TMMSAA(torch.nn.Module):
                 for key in self.keys:
                     Xtraintilde[key] = Xtrain[key][..., C_idx].clone()
             if self.model == 'AA' or self.model == 'DAA':
-                if AAsubjects is None:
-                    AAsubjects = torch.ones(Xtrain[list(self.keys)[0]].shape[0],dtype=torch.bool)
-                S = self.softmaxS(self.S)[:,AAsubjects]
-                # S = self.softmaxS(self.S)
+                S = self.softmaxS(self.S)
                 C = self.softmaxC(self.C)
             elif self.model=='SPCA':
                 Bpsoft = self.softplus(self.Bp)
@@ -159,29 +162,17 @@ class TMMSAA(torch.nn.Module):
             loss += -torch.sum(v**2)
         return loss
     
-    # def SSE(self,XtXtilde,Xtilde,C,S,Xsqnorm):
-    #     XC = Xtilde @ C
-    #     XtXC = XtXtilde @ C
-
-    #     SSE = (
-    #         Xsqnorm
-    #         - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
-    #         + torch.sum(XC*XC)
-    #     )
-    #     return SSE
-    
     def forwardAA(self,C_soft,S_soft):
         loss = 0
         XtXC = self.XtXtilde @ C_soft
         loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S_soft)
         for m,key in enumerate(self.keys):
             XC = self.Xtilde[key] @ C_soft
-            SSE = torch.sum(XC*XC) #correct
+            SSE = torch.sum(XC*XC)
             loss += SSE
         return loss
     
     def forwardSPCA(self,C):
-        # in Zou, Hastie, Tibshirani, B is here C and A is here S
         loss = 0
         XtXC = self.XtXtilde @ C
         U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
@@ -189,7 +180,7 @@ class TMMSAA(torch.nn.Module):
         loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
         for key in self.keys:
             XC = self.Xtilde[key] @ C
-            SSE = torch.sum(XC*XC) #correct
+            SSE = torch.sum(XC*XC)
             loss += SSE
         return loss
 
@@ -214,5 +205,5 @@ class TMMSAA(torch.nn.Module):
             loss+=self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))
 
         if torch.isnan(loss):
-            KeyboardInterrupt
+            raise ValueError('Loss is NaN')
         return loss

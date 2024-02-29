@@ -1,8 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
-import TMMSAA
-import TMMSAA_trainer
+from CGD import CGD, CGD_trainer
 from load_data import load_data
 from load_config import load_config
 torch.set_num_threads(16)
@@ -48,12 +47,12 @@ def main(modeltype):
                 for l1,lambda1 in enumerate(l1_vals):
                     print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'lr=',lr,'inner=',inner)
                     if l1==0:
-                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
+                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
                     else:
-                        model = TMMSAA.TMMSAA(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
+                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
                     
                     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-                    loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=True)
+                    loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=True)
                     C,S,Bp,Bn = model.get_model_params()
                     init={'Bp':Bp,'Bn':Bn}
 
