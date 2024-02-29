@@ -37,7 +37,7 @@ The main Python class `CGD.py` implements the Coupled Generator Decomposition mo
 - **Year:** 2023-2024
 - **Latest Update:** February 2024
 
-## Distribution of S matrix over subjects
+## Distribution of S matrix over subjects (EEG left, MEG right)
 <div style="display: flex;">
     <img src="figures/S_subEEG.png" alt="EEG" style="width: 45%;">
     <img src="figures/S_subMEG.png" alt="MEG" style="width: 45%;">
