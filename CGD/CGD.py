@@ -20,9 +20,9 @@ class CGD(torch.nn.Module):
     X - a dictionary of torch tensors.
 
     Optional inputs:
-    Xtilde - a dictionary of torch tensors. If not specified, Xtilde is assumed to be equal to X.
     model - the model to use. Options are 'SPCA', 'AA', 'DAA'. Default is 'SPCA'.
-    C_idx - a boolean tensor of size (P,) indicating which dimensions to construct Xtilde from (default all ones).
+    Xtilde - a dictionary of torch tensors. If not specified, Xtilde is assumed to be equal to X.
+    G_idx - a boolean tensor of size (P,) indicating which dimensions to construct Xtilde from (default all ones).
     lambda1 - the L1 regularization parameter for SPCA. 
     lambda2 - the L2 regularization parameter for SPCA.
     init - a dictionary of torch tensors, specifying the initial values for G (and S, if model=='AA').
@@ -40,7 +40,7 @@ class CGD(torch.nn.Module):
     Latest update February 2024
     """
 
-    def __init__(self,  num_comp, X, Xtilde=None, model="SPCA", C_idx=None,lambda1=None,lambda2=None,init=None):
+    def __init__(self,  num_comp, X, Xtilde=None, model="SPCA", G_idx=None,lambda1=None,lambda2=None,init=None):
         super().__init__()
         print('Initializing model: '+model)
         t1 = time()
@@ -54,20 +54,20 @@ class CGD(torch.nn.Module):
 
         # Allow for the shared generator matrix to only learn from part of the data (dimension P),
         # such as the post-stimulus period in evoked-responses, while S covers the whole signal
-        if C_idx is None:
-            C_idx = torch.ones(P,dtype=torch.bool)
-        self.C_idx = C_idx
+        if G_idx is None:
+            G_idx = torch.ones(P,dtype=torch.bool)
+        self.G_idx = G_idx
         
         self.X = X
         if Xtilde is None:
             self.Xtilde = {}
             for key in self.keys:
-                self.Xtilde[key] = X[key][..., self.C_idx].clone()
+                self.Xtilde[key] = X[key][..., self.G_idx].clone()
         
         # precompute some quantities for the SPCA and AA models
         if model == "SPCA" or model == "AA":
             self.Xsqnorm = torch.zeros(num_modalities,dtype=torch.double)
-            self.XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(C_idx)),dtype=torch.double)
+            self.XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(G_idx)),dtype=torch.double)
             for m,key in enumerate(self.keys):
                 self.Xsqnorm[m] = torch.sum(torch.linalg.matrix_norm(self.X[key],ord='fro')**2)
                 self.XtXtilde[m] = torch.transpose(self.X[key], -2, -1) @ self.Xtilde[key]
@@ -76,19 +76,19 @@ class CGD(torch.nn.Module):
         
         # initialize variables
         if self.model=='AA' or self.model=='DAA':
-            self.softmaxC = torch.nn.Softmax(dim=0)
+            self.softmaxG = torch.nn.Softmax(dim=0)
             self.softmaxS = torch.nn.Softmax(dim=-2)
 
             if init is None:
-                self.C = torch.nn.Parameter(
-                    self.softmaxC(-torch.log(torch.rand((torch.sum(C_idx).int(), num_comp), dtype=torch.double)))
+                self.G = torch.nn.Parameter(
+                    self.softmaxG(-torch.log(torch.rand((torch.sum(G_idx).int(), num_comp), dtype=torch.double)))
                 )
                 # squeeze if num_modalities is 1 and if no multiple subjects or conditions are presented
                 self.S = torch.nn.Parameter(
                     self.softmaxS(torch.squeeze(-torch.log(torch.rand(self.S_size, dtype=torch.double))))
                 )
             else:
-                self.C = init['C'].clone()
+                self.G = init['G'].clone()
                 self.S = init['S'].clone()
         elif self.model=='SPCA':
             if lambda1 is None or lambda2 is None:
@@ -97,8 +97,8 @@ class CGD(torch.nn.Module):
             self.lambda2 = lambda2
             self.softplus = torch.nn.Softplus()
             if init is None:
-                self.Bp = torch.nn.Parameter(torch.rand((torch.sum(C_idx).int(), num_comp), dtype=torch.double))
-                self.Bn = torch.nn.Parameter(torch.rand((torch.sum(C_idx).int(), num_comp), dtype=torch.double))
+                self.Bp = torch.nn.Parameter(torch.rand((torch.sum(G_idx).int(), num_comp), dtype=torch.double))
+                self.Bn = torch.nn.Parameter(torch.rand((torch.sum(G_idx).int(), num_comp), dtype=torch.double))
             else:
                 self.Bp = torch.nn.Parameter(init['Bp'].clone())
                 self.Bn = torch.nn.Parameter(init['Bn'].clone())
@@ -108,79 +108,79 @@ class CGD(torch.nn.Module):
     def get_model_params(self):
         with torch.no_grad():
             if self.model == "AA" or self.model=="DAA":
-                return self.softmaxC(self.C).detach(), self.softmaxS(self.S).detach()
+                return self.softmaxG(self.G).detach(), self.softmaxS(self.S).detach()
             elif self.model == "SPCA":
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
-                C = Bpsoft - Bnsoft 
+                G = Bpsoft - Bnsoft 
                 S = torch.zeros(self.S_size,dtype=torch.double)
-                U,_,Vt = torch.linalg.svd(self.XtXtilde @ C,full_matrices=False)
+                U,_,Vt = torch.linalg.svd(self.XtXtilde @ G,full_matrices=False)
                 S = torch.transpose(U@Vt,-2,-1)
-                return C, S,self.Bp.detach(),self.Bn.detach()
+                return G, S,self.Bp.detach(),self.Bn.detach()
 
-    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None):
+    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,G_idx=None):
         with torch.no_grad():
-            if C_idx is None:
-                C_idx = torch.ones(Xtrain[list(self.keys)[0]].shape[-1],dtype=torch.bool)
+            if G_idx is None:
+                G_idx = torch.ones(Xtrain[list(self.keys)[0]].shape[-1],dtype=torch.bool)
             if Xtraintilde is None:
                 Xtraintilde = {}
                 for key in self.keys:
-                    Xtraintilde[key] = Xtrain[key][..., C_idx].clone()
+                    Xtraintilde[key] = Xtrain[key][..., G_idx].clone()
             if self.model == 'AA' or self.model == 'DAA':
                 S = self.softmaxS(self.S)
-                C = self.softmaxC(self.C)
+                G = self.softmaxG(self.G)
             elif self.model=='SPCA':
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
-                C = Bpsoft - Bnsoft 
+                G = Bpsoft - Bnsoft 
                 num_modalities = len(Xtrain)
                 P = Xtrain[list(self.keys)[0]].shape[-1]
                 other_dims = list(Xtrain[list(self.keys)[0]].shape[:-2])
-                XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(C_idx)),dtype=torch.double)
+                XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(G_idx)),dtype=torch.double)
                 for m,key in enumerate(self.keys):
                     XtXtilde[m] = torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]
-                U,_,Vt = torch.linalg.svd(XtXtilde@C,full_matrices=False)
+                U,_,Vt = torch.linalg.svd(XtXtilde@G,full_matrices=False)
                 S = torch.transpose(U@Vt,-2,-1)
             
             loss = 0
             for m,key in enumerate(self.keys):
-                loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@C@S[m])**2)
+                loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@G@S[m])**2)
         return loss.item()
 
-    def forwardDAA(self, X, Xtilde,C_soft,S_soft):
+    def forwardDAA(self, X, Xtilde,G_soft,S_soft):
         loss = 0 
         for key in self.keys:
-            XC = Xtilde[key] @ C_soft
-            XCtXC = torch.swapaxes(XC, -2, -1) @ XC
-            XCtXC = torch.swapaxes(XC, -2, -1) @ XC
-            XtXC = torch.swapaxes(X[key], -2, -1) @ XC
+            XG = Xtilde[key] @ G_soft
+            XGtXG = torch.swapaxes(XG, -2, -1) @ XG
+            XGtXG = torch.swapaxes(XG, -2, -1) @ XG
+            XtXG = torch.swapaxes(X[key], -2, -1) @ XG
 
-            q = torch.sum(XCtXC @ S_soft * S_soft, dim=-2)
-            z = torch.sum(torch.swapaxes(XtXC, -2, -1) * S_soft, dim=-2)
+            q = torch.sum(XGtXG @ S_soft * S_soft, dim=-2)
+            z = torch.sum(torch.swapaxes(XtXG, -2, -1) * S_soft, dim=-2)
             v = (1 / torch.sqrt(q)) * z
 
             loss += -torch.sum(v**2)
         return loss
     
-    def forwardAA(self,C_soft,S_soft):
+    def forwardAA(self,G_soft,S_soft):
         loss = 0
-        XtXC = self.XtXtilde @ C_soft
-        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S_soft)
+        XtXG = self.XtXtilde @ G_soft
+        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXG, -2, -1) * S_soft)
         for m,key in enumerate(self.keys):
-            XC = self.Xtilde[key] @ C_soft
-            SSE = torch.sum(XC*XC)
+            XG = self.Xtilde[key] @ G_soft
+            SSE = torch.sum(XG*XG)
             loss += SSE
         return loss
     
-    def forwardSPCA(self,C):
+    def forwardSPCA(self,G):
         loss = 0
-        XtXC = self.XtXtilde @ C
-        U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
+        XtXG = self.XtXtilde @ G
+        U,_,Vt = torch.linalg.svd(XtXG,full_matrices=False)
         S = torch.transpose(U@Vt,-2,-1)
-        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
+        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXG, -2, -1) * S)
         for key in self.keys:
-            XC = self.Xtilde[key] @ C
-            SSE = torch.sum(XC*XC)
+            XG = self.Xtilde[key] @ G
+            SSE = torch.sum(XG*XG)
             loss += SSE
         return loss
 
@@ -188,19 +188,19 @@ class CGD(torch.nn.Module):
 
         if self.model == 'AA' or self.model == 'DAA':
             S_soft = self.softmaxS(self.S)
-            C_soft = self.softmaxC(self.C)
+            G_soft = self.softmaxG(self.G)
         elif self.model=='SPCA':
             Bpsoft = self.softplus(self.Bp)
             Bnsoft = self.softplus(self.Bn)
-            C = Bpsoft - Bnsoft 
+            G = Bpsoft - Bnsoft 
         
         # loop through modalities   
         if self.model == "AA":
-            loss = self.forwardAA(C_soft,S_soft)
+            loss = self.forwardAA(G_soft,S_soft)
         elif self.model == "DAA":
-            loss = self.forwardDAA(self.X, self.Xtilde,C_soft,S_soft)
+            loss = self.forwardDAA(self.X, self.Xtilde,G_soft,S_soft)
         elif self.model == 'SPCA':
-            loss = self.forwardSPCA(C)
+            loss = self.forwardSPCA(G)
             loss+=self.lambda1*torch.sum((Bpsoft+Bnsoft))
             loss+=self.lambda2*torch.sum((Bpsoft**2+Bnsoft**2))
 

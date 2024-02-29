@@ -32,14 +32,14 @@ def run_model(modeltype,K):
             continue
         rows_list = []
         print('Beginning modeltype=',modeltype,'K=',K,'inner=',inner)
-        model = CGD.CGD(X=X_train,num_comp=K,model='AA',init=None,C_idx=C_idx)
+        model = CGD.CGD(X=X_train,num_comp=K,model='AA',init=None,G_idx=C_idx)
         
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
         loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
         C,S = model.get_model_params()
     
-        val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,C_idx=C_idx,Xtest=X_test1)
-        test_loss = model.eval_model(Xtrain=X_train2,Xtraintilde=None,C_idx=C_idx,Xtest=X_test2)
+        val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,G_idx=C_idx,Xtest=X_test1)
+        test_loss = model.eval_model(Xtrain=X_train2,Xtraintilde=None,G_idx=C_idx,Xtest=X_test2)
         entry = {'modeltype':modeltype,'K':K,'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'val_loss':val_loss,'test_loss':test_loss}
         rows_list.append(entry)
         df = pd.concat([df,pd.DataFrame(rows_list)],ignore_index=True)

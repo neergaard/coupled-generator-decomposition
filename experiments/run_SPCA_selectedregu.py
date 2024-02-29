@@ -54,9 +54,9 @@ def run_model(modeltype,K):
             for l1,lambda1 in enumerate(l1_vals):
                 print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'inner=',inner)
                 if l1==0:
-                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
+                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init0,G_idx=C_idx)
                 else:
-                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
+                    model = CGD.CGD(X=X_train,num_comp=K,model=model1,lambda1=lambda1,lambda2=lambda2,init=init,G_idx=C_idx)
                 
                 optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
                 loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
@@ -64,14 +64,14 @@ def run_model(modeltype,K):
                 init={'Bp':Bp,'Bn':Bn}
         else:
             init0 = None
-            model = CGD.CGD(X=X_train,num_comp=K,model=model1,init=init0,C_idx=C_idx)
+            model = CGD.CGD(X=X_train,num_comp=K,model=model1,init=init0,G_idx=C_idx)
             
             optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
             loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
             C,S = model.get_model_params()
 
-        val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,C_idx=C_idx,Xtest=X_test1,AAsubjects=torch.tensor([1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],dtype=torch.bool))
-        test_loss = model.eval_model(Xtrain=X_train2,Xtraintilde=None,C_idx=C_idx,Xtest=X_test2,AAsubjects=torch.tensor([0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],dtype=torch.bool))
+        val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,G_idx=C_idx,Xtest=X_test1,AAsubjects=torch.tensor([1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],dtype=torch.bool))
+        test_loss = model.eval_model(Xtrain=X_train2,Xtraintilde=None,G_idx=C_idx,Xtest=X_test2,AAsubjects=torch.tensor([0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],dtype=torch.bool))
     
         
         entry = {'modeltype':modeltype,'K':K,'lambda2':lambda2,'lambda1':lambda1.item(),'inner':inner,

@@ -47,9 +47,9 @@ def main(modeltype):
                 for l1,lambda1 in enumerate(l1_vals):
                     print('Beginning modeltype=',modeltype,'K=',K,'lambda1=',lambda1,'lambda2=',lambda2,'lr=',lr,'inner=',inner)
                     if l1==0:
-                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,C_idx=C_idx)
+                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init0,G_idx=C_idx)
                     else:
-                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,C_idx=C_idx)
+                        model = CGD.CGD(X=X_train,num_comp=K,model='SPCA',lambda1=lambda1,lambda2=lambda2,init=init,G_idx=C_idx)
                     
                     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
                     loss,_ = CGD_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=True)
