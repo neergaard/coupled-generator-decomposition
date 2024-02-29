@@ -32,8 +32,7 @@ class CGD(torch.nn.Module):
     For sparse PCA, the model optimizes a shared generator matrix G (P,K) and a mixing matrix S (*,K,P) is
     inferred using a procrustes transformation through (X.T@Xtilde)@G. 
     AA: Archetypal Analysis, in which the model optimizes a shared generator matrix G (P,K) and a mixing matrix S (*,K,P).
-    Both G and S are assumed non-negative and sum-to-one constraints enforced through the softmax function. For G, the sum-to-one
-    constraint is enforced across the first dimension, while for S, the sum-to-one constraint is enforced across the second dimension.
+    Both G and S are assumed non-negative and sum-to-one constraints enforced through the softmax function. 
     DAA: Directional Archetypal Analysis, which works similarly to AA except the data are assumes to be on a sign-invariant hypersphere. 
 
     Author: Anders S Olsen, DTU Compute, 2023-2024
