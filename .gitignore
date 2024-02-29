@@ -1,6 +1,10 @@
-freesurfer/
-slurm/
-submitfiles/logs/
-*.pyc
 data/
+data/concatenatedData/
+data/MEEGtimes.pt
 tmp.png
+*.egg-info/
+.vscode/
+onetime_usage_scripts_unused/
+submitfiles/
+figure_scripts/figures_tmp/
+**/__pycache__/
