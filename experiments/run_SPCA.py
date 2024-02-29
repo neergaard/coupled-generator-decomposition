@@ -77,4 +77,4 @@ if __name__=="__main__":
             init_method = 'random'
         run_model(modeltype=modeltype[M],K=K,init_method=init_method)
     else:
-        run_model(modeltype='group',K=2,init_method='random')
+        run_model(modeltype='mm',K=2,init_method='group_PCA')

@@ -112,7 +112,7 @@ class TMMSAA(torch.nn.Module):
                 S = torch.transpose(U@Vt,-2,-1)
                 return C, S,self.Bp.detach(),self.Bn.detach()
 
-    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None):
+    def eval_model(self, Xtrain,Xtest,Xtraintilde=None,C_idx=None,AAsubjects=None):
         with torch.no_grad():
             if C_idx is None:
                 C_idx = torch.ones(Xtrain[list(self.keys)[0]].shape[-1],dtype=torch.bool)
@@ -121,19 +121,27 @@ class TMMSAA(torch.nn.Module):
                 for key in self.keys:
                     Xtraintilde[key] = Xtrain[key][..., C_idx].clone()
             if self.model == 'AA' or self.model == 'DAA':
-                S = self.softmaxS(self.S)
+                if AAsubjects is None:
+                    AAsubjects = torch.ones(Xtrain[list(self.keys)[0]].shape[0],dtype=torch.bool)
+                S = self.softmaxS(self.S)[:,AAsubjects]
+                # S = self.softmaxS(self.S)
                 C = self.softmaxC(self.C)
             elif self.model=='SPCA':
                 Bpsoft = self.softplus(self.Bp)
                 Bnsoft = self.softplus(self.Bn)
                 C = Bpsoft - Bnsoft 
-                for key in self.keys:
-                    U,_,Vt = torch.linalg.svd(torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]@C,full_matrices=False)
-                    S = torch.transpose(U@Vt,-2,-1)
+                num_modalities = len(Xtrain)
+                P = Xtrain[list(self.keys)[0]].shape[-1]
+                other_dims = list(Xtrain[list(self.keys)[0]].shape[:-2])
+                XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(C_idx)),dtype=torch.double)
+                for m,key in enumerate(self.keys):
+                    XtXtilde[m] = torch.transpose(Xtrain[key], -2, -1) @ Xtraintilde[key]
+                U,_,Vt = torch.linalg.svd(XtXtilde@C,full_matrices=False)
+                S = torch.transpose(U@Vt,-2,-1)
             
             loss = 0
-            for key in self.keys:
-                loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@C@S)**2)
+            for m,key in enumerate(self.keys):
+                loss += torch.sum(torch.linalg.matrix_norm(Xtest[key]-Xtraintilde[key]@C@S[m])**2)
         return loss.item()
 
     def forwardDAA(self, X, Xtilde,C_soft,S_soft):
@@ -151,16 +159,16 @@ class TMMSAA(torch.nn.Module):
             loss += -torch.sum(v**2)
         return loss
     
-    def SSE(self,XtXtilde,Xtilde,C,S,Xsqnorm):
-        XC = Xtilde @ C
-        XtXC = XtXtilde @ C
+    # def SSE(self,XtXtilde,Xtilde,C,S,Xsqnorm):
+    #     XC = Xtilde @ C
+    #     XtXC = XtXtilde @ C
 
-        SSE = (
-            Xsqnorm
-            - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
-            + torch.sum(XC*XC)
-        )
-        return SSE
+    #     SSE = (
+    #         Xsqnorm
+    #         - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
+    #         + torch.sum(XC*XC)
+    #     )
+    #     return SSE
     
     def forwardAA(self,C_soft,S_soft):
         loss = 0
@@ -179,7 +187,7 @@ class TMMSAA(torch.nn.Module):
         U,_,Vt = torch.linalg.svd(XtXC,full_matrices=False)
         S = torch.transpose(U@Vt,-2,-1)
         loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXC, -2, -1) * S)
-        for m,key in enumerate(self.keys):
+        for key in self.keys:
             XC = self.Xtilde[key] @ C
             SSE = torch.sum(XC*XC) #correct
             loss += SSE

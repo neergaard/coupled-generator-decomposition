@@ -82,3 +82,6 @@ def load_data(data_pool='all',type='mmmsmc',preproc='FT_frob',as_numpy_array=Fal
         return X_train,X_test
     elif data_pool == 'half':
         return X_train1,X_train2,X_test1,X_test2
+    
+if __name__=="__main__":
+    load_data(data_pool='all',type='mmms',preproc='split',as_numpy_array=False)

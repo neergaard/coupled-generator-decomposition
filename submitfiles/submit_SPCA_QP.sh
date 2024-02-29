@@ -1,11 +1,11 @@
 #!/bin/sh
 #BSUB -J QP_job
 #BSUB -q hpc
-#BSUB -R "rusage[mem=128MB]"
+#BSUB -R "rusage[mem=512MB]"
 #BSUB -o submitfiles/logs/QP_job_out_%J.txt
 #BSUB -e submitfiles/logs/QP_job_err_%J.txt
-#BSUB -W 55:00 
-#BSUB -n 8
+#BSUB -W 72:00 
+#BSUB -n 1
 #BSUB -R "span[hosts=1]"
 
 # -- commands you want to execute -- 

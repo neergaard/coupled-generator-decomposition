@@ -21,10 +21,11 @@ def run_model(modeltype,K):
     try:
         df = pd.read_csv('data/AA_results/AA_results_K='+str(K)+'_'+modeltype+'.csv')
     except:
-        df = pd.DataFrame(columns=['modeltype','K','inner','iter','train_loss','test_loss'])
+        df = pd.DataFrame(columns=['modeltype','K','inner','iter','train_loss','val_loss','test_loss'])
 
     # loop over group, multimodal, and multimodal+multisubject
-    X_train,X_test = load_data(data_pool='all',type=modeltype,preproc='FT_frob')
+    X_train,_ = load_data(data_pool='all',type=modeltype,preproc='split')
+    X_train1,X_train2,X_test1,X_test2 = load_data(data_pool='half',type=modeltype,preproc='split')
 
     for inner in range(config['num_iter_LR_selection']):  
         # if inner already done, skip
@@ -37,9 +38,10 @@ def run_model(modeltype,K):
         optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
         loss,_ = TMMSAA_trainer.Optimizationloop(model=model,optimizer=optimizer,max_iter=config['max_iterations'],tol=config['tolerance'],disable_output=False)
         C,S = model.get_model_params()
-
-        test_loss = model.eval_model(Xtrain=X_train,Xtraintilde=None,C_idx=C_idx,Xtest=X_test)
-        entry = {'modeltype':modeltype,'K':K,'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'test_loss':test_loss}
+    
+        val_loss = model.eval_model(Xtrain=X_train1,Xtraintilde=None,C_idx=C_idx,Xtest=X_test1)
+        test_loss = model.eval_model(Xtrain=X_train2,Xtraintilde=None,C_idx=C_idx,Xtest=X_test2)
+        entry = {'modeltype':modeltype,'K':K,'inner':inner,'iter':len(loss),'train_loss':np.min(np.array(loss)),'val_loss':val_loss,'test_loss':test_loss}
         rows_list.append(entry)
         df = pd.concat([df,pd.DataFrame(rows_list)],ignore_index=True)
     df.to_csv('data/AA_results/AA_results_K='+str(K)+'_'+modeltype+'.csv',index=False)

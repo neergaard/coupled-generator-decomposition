@@ -4,6 +4,8 @@ import numpy as np
 import cvxopt
 cvxopt.solvers.options['show_progress'] = False
 import time
+import os
+os.environ["OMP_NUM_THREADS"] = "8"
 
 def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=None,max_iter=100, tol=1e-10,Bp_init=None,Bn_init=None,disable_output=False):
     
@@ -64,6 +66,7 @@ def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=No
             #sol = quadprog.solve_qp(P,-Q[k],-G,h)[0]
             Bp[:,k] = sol[:P] #første halvdel
             Bn[:,k] = sol[P:] #anden halvdel
+            cvxopt.solvers.options
 
         loss = 0
         for m,key in enumerate(X):
@@ -71,8 +74,13 @@ def Optimizationloop(num_comp, X, Xtilde=None,C_idx=None,lambda1=None,lambda2=No
         all_loss.append(loss.item())
 
         if epoch>5:
-            if (all_loss[-5] - loss)/all_loss[-5] < tol:
+            latest = np.array(all_loss[-5:])
+            minval = np.min(latest)
+            secondlowest = np.min(latest[latest!=minval])
+            if (secondlowest-minval)/minval<tol:
                 break
+            # if (all_loss[-5] - loss)/all_loss[-5] < tol:
+            #     break
 
     print("Tolerance reached at " + str(epoch) + " number of iterations")
     return all_loss,Bp,Bn,S

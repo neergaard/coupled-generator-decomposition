@@ -1,10 +1,10 @@
 #!/bin/sh
 #BSUB -J torch_job
 #BSUB -q hpc
-#BSUB -R "rusage[mem=128MB]"
+#BSUB -R "rusage[mem=64MB]"
 #BSUB -o submitfiles/logs/torch_job_out_%J.txt
 #BSUB -e submitfiles/logs/torch_job_err_%J.txt
-#BSUB -W 55:00 
+#BSUB -W 48:00 
 #BSUB -n 8
 #BSUB -R "span[hosts=1]"
 

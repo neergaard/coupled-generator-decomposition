@@ -6,7 +6,6 @@ import pandas as pd
 import larsqp_trainer
 from load_data import load_data
 from load_config import load_config
-# torch.set_num_threads(8)
 os.environ["OMP_NUM_THREADS"] = "8"
 
 def run_model(modeltype,K,init_method='group_PCA'):
@@ -40,7 +39,6 @@ def run_model(modeltype,K,init_method='group_PCA'):
             continue
         if init_method == 'group_PCA':
             print('Calculating group PCA initialization...')
-            # _,_,V_group_pca = torch.pca_lowrank(X_train['all'][...,torch.tensor(C_idx)],q=K,niter=100)
             _,_,V_group_pca = torch.pca_lowrank(X_traingroup['all'],q=K)
             Bp_init0 = np.array(torch.nn.functional.relu(V_group_pca))
             Bn_init0 = np.array(torch.nn.functional.relu(-V_group_pca))
@@ -77,4 +75,4 @@ if __name__=="__main__":
             init_method = 'random'
         run_model(modeltype=modeltype[M],K=K,init_method=init_method)
     else:
-        run_model(modeltype='mmms',K=20,init_method='group_PCA')
+        run_model(modeltype='mmms',K=2,init_method='group_PCA')
