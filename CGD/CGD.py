@@ -82,9 +82,8 @@ class CGD(torch.nn.Module):
                 self.G = torch.nn.Parameter(
                     self.softmaxG(-torch.log(torch.rand((torch.sum(G_idx).int(), num_comp), dtype=torch.double)))
                 )
-                # squeeze if num_modalities is 1 and if no multiple subjects or conditions are presented
                 self.S = torch.nn.Parameter(
-                    self.softmaxS(torch.squeeze(-torch.log(torch.rand(self.S_size, dtype=torch.double))))
+                    self.softmaxS(-torch.log(torch.rand(self.S_size, dtype=torch.double)))
                 )
             else:
                 self.G = init['G'].clone()
@@ -163,12 +162,9 @@ class CGD(torch.nn.Module):
     
     def forwardAA(self,G_soft,S_soft):
         loss = 0
-        XtXG = self.XtXtilde @ G_soft
-        loss+= torch.sum(self.Xsqnorm) - 2 * torch.sum(torch.transpose(XtXG, -2, -1) * S_soft)
         for m,key in enumerate(self.keys):
-            XG = self.Xtilde[key] @ G_soft
-            SSE = torch.sum(XG*XG)
-            loss += SSE
+            loss += torch.sum(torch.linalg.matrix_norm(self.X[key]-self.Xtilde[key]@G_soft@S_soft[m])**2)
+
         return loss
     
     def forwardSPCA(self,G):
