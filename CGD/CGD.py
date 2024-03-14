@@ -45,11 +45,11 @@ class CGD(torch.nn.Module):
         t1 = time()
         
         self.model = model
+        self.keys = X.keys()
 
         num_modalities = len(X) #infer number of modalities from number of entries in dictionary X
         P = X[list(self.keys)[0]].shape[-1] #P should be equal across all dictionary entries
         other_dims = list(X[list(self.keys)[0]].shape[:-2]) #other dimensions, except N
-        self.keys = X.keys()
 
         # Allow for the shared generator matrix to only learn from part of the data (dimension P),
         # such as the post-stimulus period in evoked-responses, while S covers the whole signal
