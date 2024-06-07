@@ -64,7 +64,7 @@ class CGD(torch.nn.Module):
                 self.Xtilde[key] = X[key][..., self.G_idx].clone()
         
         # precompute some quantities for the SPCA and AA models
-        if model == "SPCA" or model == "AA":
+        if model == "SPCA":
             self.Xsqnorm = torch.zeros(num_modalities,dtype=torch.double)
             self.XtXtilde = torch.zeros((num_modalities,*other_dims,P,torch.sum(G_idx)),dtype=torch.double)
             for m,key in enumerate(self.keys):
